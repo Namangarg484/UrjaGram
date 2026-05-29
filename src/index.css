@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-forest: #1a5c40;
+  --color-meadow: #2e7d52;
+  --color-amber: #d4a017;
+  --color-parchment: #f5f1e8;
+  --color-card: #ffffff;
+  --color-ink: #1c1c1c;
+  --color-muted: #555555;
+  --color-border: #d4d4d4;
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+body {
+  @apply m-0 bg-parchment font-sans text-ink antialiased;
+  background-image:
+    radial-gradient(circle at top left, rgba(46, 125, 82, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(245, 241, 232, 0.95));
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.card {
+  @apply rounded-card border border-border bg-white shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg;
+}
+
+.input-base {
+  @apply w-full rounded-input border border-border bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-meadow focus:ring-2 focus:ring-meadow/20;
+}
+
+.badge {
+  @apply inline-flex items-center rounded-badge px-3 py-1 text-xs font-semibold;
+}
+
+.empty-illustration svg {
+  @apply h-40 w-40;
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
