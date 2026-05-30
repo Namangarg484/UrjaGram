@@ -7,6 +7,7 @@ import { runSolarCalculations } from '../utils/calculations';
 import { assessSolarImage, generateSolarViipSection } from '../utils/openaiApi';
 import { resizeImageForVision } from '../utils/imageUtils';
 import { insertSolarAssessment } from '../utils/supabaseClient';
+import { fetchLivePeakSunHours } from '../utils/geeApi';
 
 const roofTypeOptions = [
   { value: 'flat', label: 'Flat / RCC' },
@@ -136,7 +137,7 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
       setLoadingStep(1);
       const aiResult = await assessSolarImage({ imageMime, imageBase64 });
 
-      // Step 3: run calculations
+      // Step 3: run calculations (optionally with live GEE peak sun hours)
       setLoadingStep(3);
       const resolvedRoofType = aiResult.roof_type_detected
         ? detectRoofKey(aiResult.roof_type_detected)
@@ -144,18 +145,26 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
 
       setForm((current) => ({ ...current, roofType: resolvedRoofType }));
 
+      // Try live satellite peak sun hours; fall back to LUT if unavailable
+      const stateCoords = stateOptions.find((s) => s.value === form.state);
+      const livePeakHours = stateCoords
+        ? await fetchLivePeakSunHours(stateCoords.lat, stateCoords.lng)
+        : null;
+
       const computed = runSolarCalculations({
         roofArea: aiResult.roof_area_sqm,
         shadingPct: aiResult.shading_pct,
         roofType: resolvedRoofType,
         stateKey: form.state,
         monthlyConsumption: Number(form.monthlyConsumption),
+        overridePeakHours: livePeakHours,
       });
 
       setResult({
         aiResult,
         computed,
         resolvedRoofType,
+        livePeakHours,
         formSnapshot: { ...form, roofType: resolvedRoofType, monthlyConsumption: Number(form.monthlyConsumption) },
         imagePreview: imagePreview,
         calledAt: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),

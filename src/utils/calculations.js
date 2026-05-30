@@ -6,8 +6,8 @@ export const PANEL_AREA = 1.8;
 export const PANEL_WATT = 400;
 export const CO2_FACTOR = 0.82;
 
-export function runSolarCalculations({ roofArea, shadingPct, roofType, stateKey, monthlyConsumption }) {
-  const peakHours = PEAK_HOURS[stateKey] || PEAK_HOURS.haryana;
+export function runSolarCalculations({ roofArea, shadingPct, roofType, stateKey, monthlyConsumption, overridePeakHours }) {
+  const peakHours = overridePeakHours ?? PEAK_HOURS[stateKey] ?? PEAK_HOURS.haryana;
   const roofFactor = ROOF_FACTOR[roofType] || ROOF_FACTOR.flat;
   const usableArea = roofArea * roofFactor * (1 - shadingPct / 100);
   const panelCount = Math.max(0, Math.floor(usableArea / PANEL_AREA));
