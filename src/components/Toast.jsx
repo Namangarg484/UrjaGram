@@ -24,7 +24,7 @@ function Toast({ toast, onClose }) {
   }, [onClose, toast.id]);
 
   return (
-    <div className={`rounded-card border px-4 py-3 shadow-card ${tone.className}`}>
+    <div className={`animate-slidein rounded-card border px-4 py-3 shadow-lift backdrop-blur-md ${tone.className}`}>
       <div className="flex items-start gap-3">
         <Icon className={`mt-0.5 h-5 w-5 ${tone.accent}`} />
         <div className="flex-1 text-sm font-medium">{toast.message}</div>

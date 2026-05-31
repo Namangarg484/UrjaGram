@@ -9,6 +9,8 @@ import MRVDashboard from './components/MRVDashboard';
 import SchemeFinder from './components/SchemeFinder';
 import WaterSolar from './components/WaterSolar';
 import Toast from './components/Toast';
+import SettingsModal from './components/SettingsModal';
+import ProfileModal from './components/ProfileModal';
 import {
   fetchVillages,
   fetchAssessments,
@@ -28,7 +30,18 @@ const NAV_ITEMS = [
   { id: 'schemes',   label: 'Scheme Finder',      icon: Search },
 ];
 
-const STATIC_USER = { name: 'Naman Garg', role: 'Admin', initials: 'NG' };
+const STATIC_USER = { name: 'Naman Garg', role: 'Admin', initials: 'NG', email: 'naman@urjagram.in' };
+
+const DEFAULT_SETTINGS = { animations: true, notifications: true, compact: false };
+
+function loadStored(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? { ...fallback, ...JSON.parse(raw) } : fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 function App() {
   const [activeModule, setActiveModule] = useState('dashboard');
@@ -38,7 +51,12 @@ function App() {
   const [viipDocuments, setViipDocuments] = useState([]);
   const [toasts, setToasts] = useState([]);
   const [dbConnected, setDbConnected] = useState(false);
+  const [user, setUser] = useState(() => loadStored('urjagram.user', STATIC_USER));
+  const [settings, setSettings] = useState(() => loadStored('urjagram.settings', DEFAULT_SETTINGS));
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const realtimeRef = useRef(null);
+
 
   // ── Load data from Supabase on mount ───────────────────────────────────────
   useEffect(() => {
@@ -107,6 +125,7 @@ function App() {
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   const showToast = (message, tone = 'success') => {
+    if (!settings.notifications) return;
     const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     setToasts((c) => [...c, { id, message, tone }]);
     setTimeout(() => setToasts((c) => c.filter((t) => t.id !== id)), 5000);
@@ -130,7 +149,22 @@ function App() {
     showToast(`${scheme.name} added to active ViIP ✓`);
   };
 
-  const user = STATIC_USER;
+  // ── Persist user + settings, and reflect settings on the document root ──────
+  useEffect(() => {
+    try { localStorage.setItem('urjagram.user', JSON.stringify(user)); } catch { /* ignore */ }
+  }, [user]);
+
+  useEffect(() => {
+    try { localStorage.setItem('urjagram.settings', JSON.stringify(settings)); } catch { /* ignore */ }
+    const root = document.documentElement;
+    root.classList.toggle('no-motion', !settings.animations);
+    root.classList.toggle('compact', settings.compact);
+  }, [settings]);
+
+  const handleSignOut = () => {
+    setProfileOpen(false);
+    showToast('Sign-out is disabled in this demo build.', 'error');
+  };
 
   const sharedModuleProps = {
     villages, assessments, mrvRecords, viipDocuments,
@@ -160,7 +194,8 @@ function App() {
           navItems={NAV_ITEMS}
           onSelect={setActiveModule}
           settingsIcon={Settings}
-          onSettings={() => showToast(`UrjaGram VET-OS v1.0 · Database ${dbConnected ? 'live' : 'sample mode'} · ${assessments.length} assessments loaded`)}
+          onSettings={() => setSettingsOpen(true)}
+          onProfile={() => setProfileOpen(true)}
           user={user}
         />
 
@@ -198,15 +233,45 @@ function App() {
                 <Bell className="h-4 w-4" />
                 {dbConnected && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-meadow ring-2 ring-white" />}
               </button>
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-forest text-xs font-bold text-white">
+              <button
+                onClick={() => setSettingsOpen(true)}
+                title="Settings"
+                className="hidden h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-white/80 text-muted backdrop-blur-sm transition hover:border-meadow hover:text-meadow sm:flex"
+              >
+                <Settings className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setProfileOpen(true)}
+                title="Your profile"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-forest text-xs font-bold text-white ring-2 ring-transparent transition hover:ring-amber/60"
+              >
                 {user.initials}
-              </div>
+              </button>
             </div>
           </div>
 
           <div className="overflow-auto p-4 md:p-6">{renderModule()}</div>
         </main>
       </div>
+
+      <SettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        settings={settings}
+        onChange={setSettings}
+        dbConnected={dbConnected}
+        counts={{ villages: villages.length, assessments: assessments.length, mrv: mrvRecords.length }}
+        onReload={() => { loadAllData(); showToast('Reloading data from source…'); }}
+      />
+
+      <ProfileModal
+        open={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        user={user}
+        onSave={(next) => { setUser(next); showToast('Profile updated ✓'); }}
+        onOpenSettings={() => setSettingsOpen(true)}
+        onSignOut={handleSignOut}
+      />
 
       <div className="fixed right-4 top-4 z-[1000] flex w-full max-w-sm flex-col gap-3">
         {toasts.map((toast) => (

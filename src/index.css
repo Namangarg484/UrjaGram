@@ -166,9 +166,14 @@ textarea {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
+@keyframes slidein {
+  0% { opacity: 0; transform: translateX(24px) scale(0.98); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
 
 .animate-scalein { animation: scalein 0.4s var(--ease-spring) both; }
 .animate-floaty { animation: floaty 6s ease-in-out infinite; }
+.animate-slidein { animation: slidein 0.35s var(--ease-spring) both; }
 
 /* Stagger helper — children fade up in sequence */
 .stagger > * { animation: floatin 0.5s var(--ease-spring) both; }
@@ -185,6 +190,18 @@ textarea {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* User-controlled motion preference (Settings → Animations) */
+html.no-motion *, html.no-motion *::before, html.no-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* User-controlled compact density (Settings → Compact density) */
+html.compact .card { padding: 1rem; }
+html.compact main .overflow-auto { padding: 0.75rem; }
+html.compact .space-y-6 > * + * { margin-top: 1rem; }
 
 @media print {
   body {
