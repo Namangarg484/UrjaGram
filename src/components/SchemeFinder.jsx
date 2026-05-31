@@ -1,10 +1,36 @@
 import { useMemo, useState } from 'react';
-import { Search } from 'lucide-react';
-import { schemes } from '../data/schemes';
+import { Search, ExternalLink, FileDown } from 'lucide-react';
+import { schemes, schemeEligibility } from '../data/schemes';
 import { stateOptions } from '../data/solarLUT';
+import { formatIndianNumber } from '../utils/indianFormat';
 
 const villageCategories = ['General', 'SC/ST majority', 'Tribal', 'Coastal', 'Hill'];
-const focusAreas = ['Solar', 'Water', 'Agriculture', 'Health', 'Women Empowerment', 'Forest'];
+const focusAreas = ['Solar', 'Water', 'Agriculture', 'Finance', 'Infrastructure', 'Livelihood'];
+
+const ELIGIBILITY_TONE = {
+  green: 'bg-meadow/10 text-meadow border-meadow/30',
+  orange: 'bg-amber/15 text-amber border-amber/30',
+  red: 'bg-red-100 text-red-600 border-red-200',
+};
+const ELIGIBILITY_LABEL = { green: 'Eligible', orange: 'Partial match', red: 'Not eligible' };
+
+function downloadChecklist(scheme) {
+  const lines = [
+    `UrjaGram — Document Checklist`,
+    `Scheme: ${scheme.name} (${scheme.ministry})`,
+    `Portal: ${scheme.url}`,
+    ``,
+    `Required documents:`,
+    ...scheme.documents.map((d, i) => `  ${i + 1}. ${d}`),
+  ].join('\n');
+  const blob = new Blob([lines], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${scheme.name.replace(/[^a-z0-9]+/gi, '_')}_checklist.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 function EmptySchemeState() {
   return (
@@ -135,8 +161,10 @@ function SchemeFinder({ addSchemeToViip, showToast }) {
       <section>
         {filteredSchemes.length ? (
           <div className="grid gap-5 md:grid-cols-2">
-            {filteredSchemes.map((scheme) => (
-              <article key={scheme.id} className="card p-5">
+            {filteredSchemes.map((scheme) => {
+              const verdict = schemeEligibility(scheme, { state: filters.state, category: filters.category });
+              return (
+              <article key={scheme.id} className="card flex flex-col p-5">
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-semibold leading-6">{scheme.name}</h3>
@@ -144,10 +172,16 @@ function SchemeFinder({ addSchemeToViip, showToast }) {
                       {scheme.ministry}
                     </span>
                   </div>
+                  <span className={`shrink-0 rounded-badge border px-2.5 py-1 text-xs font-semibold ${ELIGIBILITY_TONE[verdict]}`}>
+                    {ELIGIBILITY_LABEL[verdict]}
+                  </span>
                 </div>
 
                 <div className="space-y-3 text-sm text-muted">
                   <div><span className="font-semibold text-ink">Max benefit:</span> {scheme.maxBenefit}</div>
+                  {scheme.estBenefitInr > 0 && (
+                    <div><span className="font-semibold text-ink">Est. value:</span> ₹{formatIndianNumber(scheme.estBenefitInr)}</div>
+                  )}
                   <div><span className="font-semibold text-ink">Eligibility:</span> {scheme.eligibility}</div>
                 </div>
 
@@ -159,22 +193,30 @@ function SchemeFinder({ addSchemeToViip, showToast }) {
                   ))}
                 </div>
 
-                <div className="mt-5 flex gap-3">
-                  <button
-                    onClick={() => showToast(`${scheme.name} detail view can be connected to the full scheme dossier.`)}
-                    className="flex-1 rounded-input border border-border bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:border-meadow hover:text-meadow"
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <a
+                    href={scheme.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 rounded-input bg-forest px-4 py-3 text-sm font-semibold text-white transition hover:bg-meadow"
                   >
-                    View Details
-                  </button>
+                    <ExternalLink className="h-4 w-4" /> Apply Now
+                  </a>
                   <button
-                    onClick={() => addSchemeToViip(scheme)}
-                    className="flex-1 rounded-input bg-forest px-4 py-3 text-sm font-semibold text-white transition hover:bg-meadow"
+                    onClick={() => { downloadChecklist(scheme); showToast(`Document checklist for ${scheme.name} downloaded.`); }}
+                    className="flex items-center justify-center gap-2 rounded-input border border-border bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:border-meadow hover:text-meadow"
                   >
-                    Add to ViIP
+                    <FileDown className="h-4 w-4" /> Documents
                   </button>
                 </div>
+                <button
+                  onClick={() => addSchemeToViip(scheme)}
+                  className="mt-3 rounded-input border border-border bg-parchment/60 px-4 py-2.5 text-sm font-semibold text-ink transition hover:border-meadow hover:text-meadow"
+                >
+                  Add to ViIP
+                </button>
               </article>
-            ))}
+            );})}
           </div>
         ) : (
           <EmptySchemeState />

@@ -29,6 +29,20 @@ const statCards = [
 function Dashboard({ villages, assessments, mrvRecords }) {
   const formatNumber = useIndianNumberFormat();
 
+  // ── Live SDG aggregation from real assessment records ──────────────────────
+  const totalKWp = assessments.reduce((s, a) => s + (Number(a.systemKWp) || 0), 0);
+  const totalAnnualKWh = assessments.reduce((s, a) => s + (Number(a.annualKWh) || 0), 0);
+  const totalCo2T = assessments.reduce((s, a) => s + (Number(a.co2OffsetT) || 0), 0);
+  const householdsPowered = Math.round(totalAnnualKWh / 1200); // 1200 kWh/yr per rural HH
+  const billSavingsInr = Math.round(totalAnnualKWh * 7.5);      // ₹7.5/kWh residential tariff
+
+  const sdgGoals = [
+    { id: 1, label: 'No Poverty', sub: 'Annual bill savings', value: billSavingsInr, target: 5_000_000, fmt: (v) => `₹${formatNumber(v)}`, color: '#EF4444' },
+    { id: 7, label: 'Clean Energy', sub: 'Solar capacity installed', value: totalKWp, target: 1000, fmt: (v) => `${formatNumber(Math.round(v))} kWp`, color: '#D4A017' },
+    { id: 11, label: 'Sustainable Communities', sub: 'Households powered', value: householdsPowered, target: 500, fmt: (v) => `${formatNumber(v)} HH`, color: '#8B5CF6' },
+    { id: 13, label: 'Climate Action', sub: 'CO₂ offset per year', value: totalCo2T, target: 1000, fmt: (v) => `${formatNumber(Math.round(v))} tCO₂`, color: '#10B981' },
+  ];
+
   return (
     <div className="space-y-6 animate-floatin">
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -147,6 +161,45 @@ function Dashboard({ villages, assessments, mrvRecords }) {
             </div>
           </div>
         </article>
+      </section>
+
+      <section className="card p-5">
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">UN SDG Impact (Live)</h2>
+            <p className="text-sm text-muted">Aggregated from completed assessments — progress toward programme targets.</p>
+          </div>
+          <span className="badge bg-meadow/10 text-meadow">{formatNumber(assessments.length)} assessments</span>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {sdgGoals.map((goal) => {
+            const pct = Math.min(100, Math.round((goal.value / goal.target) * 100));
+            return (
+              <div key={goal.id} className="rounded-2xl border border-border bg-parchment/60 p-4">
+                <div className="mb-2 flex items-center gap-2">
+                  <span
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white"
+                    style={{ backgroundColor: goal.color }}
+                  >
+                    {goal.id}
+                  </span>
+                  <span className="text-sm font-semibold">SDG {goal.id}</span>
+                </div>
+                <div className="text-xs text-muted">{goal.label}</div>
+                <div className="mt-2 text-xl font-semibold tracking-tight">{goal.fmt(goal.value)}</div>
+                <div className="mt-1 text-[11px] text-muted">{goal.sub}</div>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-black/5">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${pct}%`, backgroundColor: goal.color }}
+                  />
+                </div>
+                <div className="mt-1 text-right text-[11px] font-medium text-muted">{pct}% of target</div>
+              </div>
+            );
+          })}
+        </div>
       </section>
     </div>
   );

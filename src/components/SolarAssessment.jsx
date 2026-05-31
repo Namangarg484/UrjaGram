@@ -52,7 +52,9 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
   const [form, setForm] = useState({
     state: 'haryana',
     roofType: 'flat',
+    buildingType: 'residential',
     monthlyConsumption: 300,
+    estimatedMonthlyIncome: 15000,
     villageName: '',
   });
   const [imageFile, setImageFile] = useState(null);
@@ -156,7 +158,9 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
         shadingPct: aiResult.shading_pct,
         roofType: resolvedRoofType,
         stateKey: form.state,
+        buildingType: form.buildingType,
         monthlyConsumption: Number(form.monthlyConsumption),
+        estimatedMonthlyIncome: Number(form.estimatedMonthlyIncome),
         overridePeakHours: livePeakHours,
       });
 
@@ -300,6 +304,26 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
           </div>
 
           <div>
+            <label className="mb-2 block text-sm font-medium">Building type</label>
+            <div className="grid grid-cols-2 gap-2">
+              {[{ v: 'residential', l: 'Residential' }, { v: 'government', l: 'Govt building' }].map((opt) => (
+                <button
+                  key={opt.v}
+                  type="button"
+                  onClick={() => setForm((c) => ({ ...c, buildingType: opt.v }))}
+                  className={`rounded-input border px-4 py-2.5 text-sm font-semibold transition ${
+                    form.buildingType === opt.v
+                      ? 'border-meadow bg-meadow/10 text-meadow'
+                      : 'border-border bg-white text-muted hover:border-meadow/40'
+                  }`}
+                >
+                  {opt.l}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
             <label className="mb-2 block text-sm font-medium">State</label>
             <select name="state" value={form.state} onChange={handleFieldChange} className="input-base">
               {stateOptions.map((state) => (
@@ -348,6 +372,26 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
               className="input-base"
             />
           </div>
+
+          {form.buildingType === 'residential' && (
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="text-sm font-medium">Est. monthly income</label>
+                <span className="text-sm font-semibold text-meadow">₹{formatIndianNumber(form.estimatedMonthlyIncome)}</span>
+              </div>
+              <input
+                type="range"
+                min="5000"
+                max="100000"
+                step="1000"
+                name="estimatedMonthlyIncome"
+                value={form.estimatedMonthlyIncome}
+                onChange={handleFieldChange}
+                className="h-2 w-full cursor-pointer appearance-none rounded-full bg-meadow/15 accent-meadow"
+              />
+              <p className="mt-1 text-[11px] text-muted">Used for loan feasibility / CIBIL-risk check.</p>
+            </div>
+          )}
 
           <button
             onClick={runAssessment}
@@ -490,6 +534,7 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
             </div>
 
             {/* PM Surya Ghar subsidy */}
+            {result.computed.flow === 'residential' && (
             <div className="rounded-card border border-amber/25 bg-amber/10 p-5">
               <div className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber">PM Surya Ghar Muft Bijli Yojana — CFA</div>
               <p className="mt-1 text-[11px] text-muted">
@@ -547,6 +592,61 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
                 </div>
               </div>
             </div>
+            )}
+
+            {/* Loan feasibility — addresses the CIBIL/paperwork hurdle */}
+            {result.computed.flow === 'residential' && result.computed.loanFeasibility && (
+              <div className={`rounded-card border p-5 ${result.computed.loanFeasibility.cibilFlag ? 'border-red-200 bg-red-50' : 'border-meadow/25 bg-meadow/5'}`}>
+                <div className={`mb-1 text-xs font-semibold uppercase tracking-[0.14em] ${result.computed.loanFeasibility.cibilFlag ? 'text-red-600' : 'text-meadow'}`}>
+                  Loan Feasibility {result.computed.loanFeasibility.cibilFlag ? '— ⚠ CIBIL risk' : '— ✓ Affordable'}
+                </div>
+                <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-xl border border-border bg-white p-4">
+                    <div className="text-xs text-muted">Net cost (after subsidy)</div>
+                    <div className="mt-1 text-xl font-bold text-ink">₹{formatIndianNumber(Math.round(result.computed.netCost))}</div>
+                  </div>
+                  <div className="rounded-xl border border-border bg-white p-4">
+                    <div className="text-xs text-muted">Monthly EMI (7 yr @ 8.5%)</div>
+                    <div className="mt-1 text-xl font-bold text-ink">₹{formatIndianNumber(result.computed.loanFeasibility.emi)}</div>
+                  </div>
+                  <div className="rounded-xl border border-border bg-white p-4">
+                    <div className="text-xs text-muted">Payback period</div>
+                    <div className="mt-1 text-xl font-bold text-ink">{result.computed.paybackYears.toFixed(1)} yrs</div>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-muted">
+                  Recommended channel: <span className="font-semibold text-ink">{result.computed.loanFeasibility.recommendedChannel}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Government building financials */}
+            {result.computed.flow === 'government' && (
+              <div className="rounded-card border border-forest/25 bg-forest/5 p-5">
+                <div className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-forest">Government CAPEX model</div>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-xl border border-border bg-white p-4">
+                    <div className="text-xs text-muted">System cost</div>
+                    <div className="mt-1 text-xl font-bold">₹{formatIndianNumber(Math.round(result.computed.systemCost))}</div>
+                  </div>
+                  <div className="rounded-xl border border-border bg-white p-4">
+                    <div className="text-xs text-muted">Annual savings</div>
+                    <div className="mt-1 text-xl font-bold text-meadow">₹{formatIndianNumber(Math.round(result.computed.annualSavings))}</div>
+                  </div>
+                  <div className="rounded-xl border border-border bg-white p-4">
+                    <div className="text-xs text-muted">ROI / year</div>
+                    <div className="mt-1 text-xl font-bold">{result.computed.roi.toFixed(1)}%</div>
+                  </div>
+                  <div className="rounded-xl border border-border bg-white p-4">
+                    <div className="text-xs text-muted">25-yr NPV @ 8%</div>
+                    <div className="mt-1 text-xl font-bold text-forest">₹{formatIndianNumber(Math.round(result.computed.npv))}</div>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-muted">
+                  Carbon credit potential: <span className="font-semibold text-ink">{result.computed.carbonCreditTonnesPerYear.toFixed(2)} tCO₂/yr</span>
+                </div>
+              </div>
+            )}
 
             {/* Panel fit notes from AI */}
             {result.aiResult.panel_fit_notes && (
