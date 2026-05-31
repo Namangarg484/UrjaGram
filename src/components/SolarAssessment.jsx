@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { ImagePlus, Satellite, Sparkles, Save } from 'lucide-react';
+import { ImagePlus, Satellite, Sparkles, Save, Sun } from 'lucide-react';
 import SkeletonLoader from './SkeletonLoader';
 import { stateOptions } from '../data/solarLUT';
 import { formatIndianNumber } from '../utils/indianFormat';
@@ -258,11 +258,30 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-      <section className="card p-6">
+    <div className="space-y-6 animate-floatin">
+      {/* Solar hero header — amber/green identity, distinct from Water module */}
+      <div className="relative overflow-hidden rounded-3xl border border-white/40 bg-gradient-to-br from-[#D4A017] via-[#2E7D52] to-[#1A5C40] p-6 text-white shadow-float md:p-8">
+        <div className="absolute -right-10 -top-12 h-48 w-48 rounded-full bg-amber/30 blur-2xl" />
+        <div className="absolute -bottom-12 left-1/3 h-40 w-40 rounded-full bg-meadow/30 blur-2xl" />
+        <div className="relative flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25 backdrop-blur-md animate-floaty">
+            <Sun className="h-7 w-7" />
+          </div>
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">Solar Assessment Module</div>
+            <h1 className="mt-0.5 text-2xl font-bold tracking-tight md:text-3xl">AI Rooftop Solar Analysis</h1>
+            <p className="mt-1 max-w-xl text-sm text-white/85">
+              GPT-4o Vision + live satellite irradiance for subsidy, loan feasibility and government CAPEX planning.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+      <section className="panel-3d p-6">
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Solar Assessment</h2>
+            <h2 className="text-lg font-bold tracking-tight text-forest">Roof & demand inputs</h2>
             <p className="mt-1 text-sm text-muted">VET-OS rooftop fit analysis for village solar planning.</p>
           </div>
           <span className="badge bg-forest/10 text-forest">VET-OS Core</span>
@@ -708,6 +727,7 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
           </div>
         ) : null}
       </section>
+      </div>
     </div>
   );
 }

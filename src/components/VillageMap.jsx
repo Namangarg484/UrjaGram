@@ -1,7 +1,7 @@
 import 'leaflet/dist/leaflet.css';
 import { useMemo, useState } from 'react';
 import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
-import { MapPinned } from 'lucide-react';
+import { MapPinned, X, Sun, Leaf, Gauge, LayoutGrid } from 'lucide-react';
 import { formatIndianNumber } from '../utils/indianFormat';
 
 const filterOptions = [
@@ -36,6 +36,7 @@ function EmptyMapState() {
 
 function VillageMap({ villages, assessments, showToast }) {
   const [filter, setFilter] = useState('all');
+  const [report, setReport] = useState(null); // { village, assessment }
 
   const visibleVillages = useMemo(() => {
     if (filter === 'all') {
@@ -147,10 +148,10 @@ function VillageMap({ villages, assessments, showToast }) {
                       ) : null}
 
                       <button
-                        onClick={() => showToast(`Full report view for ${village.name} will be connected next.`)}
-                        className="w-full rounded-input bg-forest px-3 py-2 text-sm font-semibold text-white transition hover:bg-meadow"
+                        onClick={() => setReport({ village, assessment })}
+                        className="btn-grad w-full !py-2 !text-sm"
                       >
-                        View Full Report
+                        <span className="relative z-10">View Full Report</span>
                       </button>
                     </div>
                   </Popup>
@@ -160,6 +161,76 @@ function VillageMap({ villages, assessments, showToast }) {
           </MapContainer>
         </div>
       </div>
+
+      {/* Full report modal */}
+      {report && (
+        <div
+          className="fixed inset-0 z-[1000] flex items-end justify-center bg-ink/40 p-0 backdrop-blur-sm animate-scalein sm:items-center sm:p-4"
+          onClick={() => setReport(null)}
+        >
+          <div
+            className="panel-3d max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-3xl p-6 sm:rounded-3xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-meadow">Village Report</div>
+                <h3 className="mt-1 text-2xl font-bold tracking-tight">{report.village.name}</h3>
+                <p className="text-sm text-muted">{report.village.gpName} · {report.village.district}, {report.village.state}</p>
+              </div>
+              <button
+                onClick={() => setReport(null)}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-white text-muted transition hover:border-meadow hover:text-meadow"
+                title="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mb-5 grid grid-cols-2 gap-3 text-sm">
+              <div className="rounded-2xl border border-border bg-parchment/50 p-3">
+                <div className="text-xs text-muted">Population</div>
+                <div className="mt-0.5 text-lg font-semibold">{formatIndianNumber(report.village.population)}</div>
+              </div>
+              <div className="rounded-2xl border border-border bg-parchment/50 p-3">
+                <div className="text-xs text-muted">Households</div>
+                <div className="mt-0.5 text-lg font-semibold">{formatIndianNumber(report.village.households)}</div>
+              </div>
+            </div>
+
+            {report.assessment ? (
+              <>
+                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted">Solar Assessment</div>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { icon: Sun, label: 'System capacity', value: `${formatIndianNumber(report.assessment.systemKWp)} kWp`, color: 'text-amber' },
+                    { icon: LayoutGrid, label: 'Panels', value: formatIndianNumber(report.assessment.panelCount), color: 'text-meadow' },
+                    { icon: Gauge, label: 'Annual generation', value: `${formatIndianNumber(Math.round(report.assessment.annualKWh || 0))} kWh`, color: 'text-forest' },
+                    { icon: Leaf, label: 'CO₂ offset', value: `${formatIndianNumber(report.assessment.co2OffsetT || 0)} t/yr`, color: 'text-meadow' },
+                  ].map((m) => (
+                    <div key={m.label} className="rounded-2xl border border-border bg-white p-4">
+                      <m.icon className={`h-4 w-4 ${m.color}`} />
+                      <div className="mt-2 text-xs text-muted">{m.label}</div>
+                      <div className="text-lg font-bold">{m.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-border bg-parchment/40 p-5 text-center text-sm text-muted">
+                No solar assessment recorded for this village yet.
+              </div>
+            )}
+
+            <button
+              onClick={() => setReport(null)}
+              className="btn-grad mt-6 w-full"
+            >
+              <span className="relative z-10">Close report</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

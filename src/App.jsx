@@ -155,11 +155,18 @@ function App() {
   return (
     <div className="min-h-screen bg-transparent text-ink">
       <div className="flex min-h-screen">
-        <Sidebar activeModule={activeModule} navItems={NAV_ITEMS} onSelect={setActiveModule} settingsIcon={Settings} user={user} />
+        <Sidebar
+          activeModule={activeModule}
+          navItems={NAV_ITEMS}
+          onSelect={setActiveModule}
+          settingsIcon={Settings}
+          onSettings={() => showToast(`UrjaGram VET-OS v1.0 · Database ${dbConnected ? 'live' : 'sample mode'} · ${assessments.length} assessments loaded`)}
+          user={user}
+        />
 
         <main className="min-w-0 flex-1 overflow-hidden">
           {/* Compact top bar — branding lives in sidebar */}
-          <div className="flex h-14 shrink-0 items-center justify-between border-b border-border/60 bg-white/90 px-4 backdrop-blur-sm md:px-6">
+          <div className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-white/40 bg-white/70 px-4 backdrop-blur-xl md:px-6">
             {/* Left: current module label */}
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-ink">
@@ -185,9 +192,11 @@ function App() {
               </span>
               <button
                 title="Notifications"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-muted transition hover:border-meadow hover:text-meadow"
+                onClick={() => showToast(`${assessments.length} assessments · ${mrvRecords.length} MRV records · ${dbConnected ? 'realtime sync active' : 'offline sample data'}`, dbConnected ? 'success' : 'error')}
+                className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-white/80 text-muted backdrop-blur-sm transition hover:border-meadow hover:text-meadow"
               >
                 <Bell className="h-4 w-4" />
+                {dbConnected && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-meadow ring-2 ring-white" />}
               </button>
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-forest text-xs font-bold text-white">
                 {user.initials}

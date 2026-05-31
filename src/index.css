@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -13,14 +13,25 @@
   --color-ink: #1c1c1c;
   --color-muted: #555555;
   --color-border: #d4d4d4;
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08);
+  /* Layered "Apple-style" elevation system — soft, multi-stop shadows */
+  --shadow-card: 0 1px 2px rgba(16, 40, 32, 0.04), 0 4px 16px rgba(16, 40, 32, 0.06);
+  --shadow-lift: 0 2px 6px rgba(16, 40, 32, 0.06), 0 12px 32px rgba(16, 40, 32, 0.10);
+  --shadow-float: 0 8px 24px rgba(16, 40, 32, 0.10), 0 24px 64px rgba(16, 40, 32, 0.14);
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 body {
   @apply m-0 bg-parchment font-sans text-ink antialiased;
+  /* Animated multi-point gradient mesh — pure CSS, GPU-friendly, ~0 KB */
+  background-color: #f5f1e8;
   background-image:
-    radial-gradient(circle at top left, rgba(46, 125, 82, 0.12), transparent 28%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(245, 241, 232, 0.95));
+    radial-gradient(at 8% 6%, rgba(46, 125, 82, 0.16), transparent 38%),
+    radial-gradient(at 92% 4%, rgba(212, 160, 23, 0.13), transparent 40%),
+    radial-gradient(at 78% 96%, rgba(59, 130, 246, 0.10), transparent 42%),
+    radial-gradient(at 18% 92%, rgba(26, 92, 64, 0.10), transparent 40%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 * {
@@ -34,20 +45,145 @@ textarea {
   font: inherit;
 }
 
+::selection {
+  background: rgba(46, 125, 82, 0.18);
+}
+
+/* Refined scrollbar — subtle, native-feeling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(26, 92, 64, 0.22);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 92, 64, 0.38);
+  background-clip: content-box;
+}
+
+/* ── Surfaces ──────────────────────────────────────────────────────────── */
 .card {
-  @apply rounded-card border border-border bg-white shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg;
+  @apply rounded-2xl border border-white/60 bg-white/85 backdrop-blur-xl;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.35s var(--ease-spring), box-shadow 0.35s var(--ease-spring);
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+}
+
+/* Frosted glass panel — for headers, hero sections */
+.glass {
+  @apply rounded-2xl border border-white/50 bg-white/60 backdrop-blur-2xl;
+  box-shadow: var(--shadow-card);
+}
+
+/* Solid premium panel with inner highlight (looks 3D / extruded) */
+.panel-3d {
+  @apply rounded-3xl border border-white/70 bg-white;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    var(--shadow-lift);
 }
 
 .input-base {
-  @apply w-full rounded-input border border-border bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-meadow focus:ring-2 focus:ring-meadow/20;
+  @apply w-full rounded-xl border border-border/70 bg-white/90 px-4 py-3 text-sm text-ink outline-none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.input-base:focus {
+  @apply border-meadow bg-white;
+  box-shadow: 0 0 0 4px rgba(46, 125, 82, 0.14);
 }
 
 .badge {
   @apply inline-flex items-center rounded-badge px-3 py-1 text-xs font-semibold;
 }
 
+/* ── Buttons ───────────────────────────────────────────────────────────── */
+.btn-grad {
+  @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl px-5 py-3 text-sm font-semibold text-white;
+  background: linear-gradient(135deg, #2e7d52 0%, #1a5c40 100%);
+  box-shadow: 0 6px 18px rgba(26, 92, 64, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transition: transform 0.25s var(--ease-spring), box-shadow 0.25s var(--ease-spring);
+}
+.btn-grad:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(26, 92, 64, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.btn-grad:active {
+  transform: translateY(0);
+}
+.btn-grad:disabled {
+  @apply cursor-not-allowed opacity-60;
+  transform: none;
+}
+
+.btn-aqua {
+  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.btn-aqua:hover {
+  box-shadow: 0 10px 26px rgba(37, 99, 235, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.30);
+}
+
+/* Sheen sweep on hover for gradient buttons */
+.btn-grad::after,
+.btn-aqua::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
+  transform: translateX(-130%);
+  transition: transform 0.7s var(--ease-spring);
+}
+.btn-grad:hover::after,
+.btn-aqua:hover::after {
+  transform: translateX(130%);
+}
+
 .empty-illustration svg {
   @apply h-40 w-40;
+}
+
+/* ── Motion ────────────────────────────────────────────────────────────── */
+@keyframes floatin {
+  0% { opacity: 0; transform: translateY(14px) scale(0.99); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes scalein {
+  0% { opacity: 0; transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-scalein { animation: scalein 0.4s var(--ease-spring) both; }
+.animate-floaty { animation: floaty 6s ease-in-out infinite; }
+
+/* Stagger helper — children fade up in sequence */
+.stagger > * { animation: floatin 0.5s var(--ease-spring) both; }
+.stagger > *:nth-child(1) { animation-delay: 0.02s; }
+.stagger > *:nth-child(2) { animation-delay: 0.06s; }
+.stagger > *:nth-child(3) { animation-delay: 0.10s; }
+.stagger > *:nth-child(4) { animation-delay: 0.14s; }
+.stagger > *:nth-child(5) { animation-delay: 0.18s; }
+.stagger > *:nth-child(6) { animation-delay: 0.22s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }
 
 @media print {
