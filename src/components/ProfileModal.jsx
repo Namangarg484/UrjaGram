@@ -52,10 +52,10 @@ function ProfileModal({ open, onClose, user, onSave, onOpenSettings, onSignOut }
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted">
               Display name
             </label>
-            <div className="relative">
-              <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+            <div className="flex items-center gap-2 rounded-xl border border-border/70 bg-white/90 px-3 focus-within:border-meadow focus-within:ring-2 focus-within:ring-meadow/20">
+              <User className="h-4 w-4 shrink-0 text-muted" />
               <input
-                className="input-base pl-10"
+                className="w-full bg-transparent py-3 text-sm text-ink outline-none"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
@@ -66,11 +66,11 @@ function ProfileModal({ open, onClose, user, onSave, onOpenSettings, onSignOut }
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted">
               Email
             </label>
-            <div className="relative">
-              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+            <div className="flex items-center gap-2 rounded-xl border border-border/70 bg-white/90 px-3 focus-within:border-meadow focus-within:ring-2 focus-within:ring-meadow/20">
+              <Mail className="h-4 w-4 shrink-0 text-muted" />
               <input
                 type="email"
-                className="input-base pl-10"
+                className="w-full bg-transparent py-3 text-sm text-ink outline-none"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"

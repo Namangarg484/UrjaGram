@@ -30,14 +30,33 @@ const NAV_ITEMS = [
   { id: 'schemes',   label: 'Scheme Finder',      icon: Search },
 ];
 
-const STATIC_USER = { name: 'Naman Garg', role: 'Admin', initials: 'NG', email: 'naman@urjagram.in' };
+const STATIC_USER = { name: 'Field User', role: 'Field Officer', initials: 'FU', email: '' };
 
 const DEFAULT_SETTINGS = { animations: true, notifications: true, compact: false };
 
 function loadStored(key, fallback) {
   try {
     const raw = localStorage.getItem(key);
-    return raw ? { ...fallback, ...JSON.parse(raw) } : fallback;
+    if (!raw) return fallback;
+    const parsed = { ...fallback, ...JSON.parse(raw) };
+    // Security posture for demo/public links: never auto-open as admin.
+    if (key === 'urjagram.user' && String(parsed.role || '').toLowerCase() === 'admin') {
+      const safeName = parsed.name?.trim() ? parsed.name : fallback.name;
+      const safeInitials = safeName
+        .split(' ')
+        .map((p) => p[0])
+        .filter(Boolean)
+        .slice(0, 2)
+        .join('')
+        .toUpperCase();
+      return {
+        ...parsed,
+        role: 'Field Officer',
+        name: safeName,
+        initials: safeInitials || fallback.initials,
+      };
+    }
+    return parsed;
   } catch {
     return fallback;
   }
