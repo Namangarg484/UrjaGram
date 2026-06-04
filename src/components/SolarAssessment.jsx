@@ -1,6 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { ImagePlus, Satellite, Sparkles, Sun, CheckCircle2, AlertTriangle, Smartphone, Camera, ChevronDown, ArrowRight, UserCircle, Store } from 'lucide-react';
-import SkeletonLoader from './SkeletonLoader';
+import { ImagePlus, Satellite, Sparkles, Sun, CheckCircle2, AlertTriangle, Smartphone, Camera, ChevronDown, ArrowRight, ArrowLeft, UserCircle, Store } from 'lucide-react';
 import { stateOptions } from '../data/solarLUT';
 import { formatIndianNumber } from '../utils/indianFormat';
 import { runSolarCalculations } from '../utils/calculations';
@@ -11,8 +10,6 @@ import { fetchLivePeakSunHours } from '../utils/geeApi';
 import { analyzeDocumentImage } from '../utils/documentQuality';
 import {
   evaluatePmSuryaKyc,
-  NAME_MISMATCH_PLAYBOOK,
-  PM_SURYA_GOVT_CHALLENGES,
   PM_SURYA_MOBILE_DOCS,
   PM_SURYA_PROCESS_STEPS,
 } from '../utils/pmSuryaKyc';
@@ -50,7 +47,6 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
   const [result, setResult] = useState(null);
   const [docUploads, setDocUploads] = useState({});
   const [docAnalyzingId, setDocAnalyzingId] = useState(null);
-  const [showMismatchPlaybook, setShowMismatchPlaybook] = useState(false);
 
   const selectedState = useMemo(() => stateOptions.find((item) => item.value === form.state) || stateOptions[0], [form.state]);
 
@@ -136,7 +132,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
   });
 
   const handleSaveAssessment = async () => {
-    showToast('Assessment saved. Ready for DISCOM application.');
+    showToast('Application successfully compiled and ready for submission!');
     setStep(6);
   };
 
@@ -145,58 +141,77 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
     switch (step) {
       case 1:
         return (
-          <div className="space-y-5 animate-in fade-in">
-            <h3 className="text-xl font-bold">Step 1: Rooftop AI Assessment</h3>
-            <p className="text-sm text-muted">Upload a satellite or drone image of the rooftop to assess solar generation capacity.</p>
+          <div className="space-y-6 animate-in fade-in">
+            <div>
+              <h3 className="text-2xl font-semibold tracking-tight text-ink">Rooftop Generation Assessment</h3>
+              <p className="text-sm text-muted mt-1">Upload a clear satellite or drone image of the {userRole === 'vendor' ? "client's" : "your"} rooftop.</p>
+            </div>
             
             <div
-              className="flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-card border border-dashed border-border bg-parchment/60 p-6 text-center transition hover:border-meadow hover:bg-meadow/5"
+              className="group flex min-h-[260px] cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-border/70 bg-white/50 backdrop-blur-sm p-6 text-center transition-all duration-300 hover:border-meadow/50 hover:bg-meadow/5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
               onClick={() => fileInputRef.current?.click()}
             >
               {imagePreview ? (
-                <div className="w-full space-y-4">
-                  <img src={imagePreview} alt="Preview" className="h-52 w-full rounded-card object-cover" />
-                  <div className="text-sm font-medium text-meadow">Change Image</div>
+                <div className="w-full space-y-4 animate-in zoom-in-95 duration-300">
+                  <img src={imagePreview} alt="Preview" className="h-64 w-full rounded-2xl object-cover shadow-sm" />
+                  <div className="text-sm font-medium text-meadow group-hover:text-forest transition-colors">Tap to change image</div>
                 </div>
               ) : (
-                <>
-                  <Satellite className="mb-4 h-8 w-8 text-meadow" />
-                  <p className="font-semibold">Drop image here or click to browse</p>
-                </>
+                <div className="flex flex-col items-center justify-center text-muted transition-transform duration-300 group-hover:scale-105">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-meadow/10 mb-4">
+                    <Satellite className="h-8 w-8 text-meadow" />
+                  </div>
+                  <p className="font-semibold text-ink text-lg">Drop image here or browse</p>
+                  <p className="text-sm mt-1">Supports PNG, JPG, WEBP</p>
+                </div>
               )}
               <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => handleFileSelection(e.target.files?.[0])} />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">State</label>
-                <select name="state" value={form.state} onChange={handleFieldChange} className="input-base mt-1">
+            <div className="grid grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-ink/80">State</label>
+                <select name="state" value={form.state} onChange={handleFieldChange} className="w-full rounded-2xl border border-border/70 bg-white px-4 py-3 text-sm text-ink outline-none transition-shadow focus:border-meadow focus:ring-4 focus:ring-meadow/10 appearance-none shadow-sm">
                   {stateOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
               </div>
-              <div>
-                <label className="text-sm font-medium">Roof Type</label>
-                <select name="roofType" value={form.roofType} onChange={handleFieldChange} className="input-base mt-1">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-ink/80">Roof Type</label>
+                <select name="roofType" value={form.roofType} onChange={handleFieldChange} className="w-full rounded-2xl border border-border/70 bg-white px-4 py-3 text-sm text-ink outline-none transition-shadow focus:border-meadow focus:ring-4 focus:ring-meadow/10 appearance-none shadow-sm">
                   {roofTypeOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
               </div>
             </div>
 
-            <button onClick={runAssessment} disabled={loadingAssessment} className="w-full btn-primary flex justify-center gap-2 py-3 bg-meadow text-white rounded-xl">
-              {loadingAssessment ? 'Analysing with GPT-4o Vision...' : <><Sparkles className="h-5 w-5"/> Analyze Generation</>}
+            <button onClick={runAssessment} disabled={loadingAssessment} className="group relative w-full overflow-hidden rounded-2xl bg-forest px-6 py-4 text-white font-semibold shadow-md transition-all hover:bg-[#154a33] hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed">
+              <div className="flex items-center justify-center gap-2 relative z-10">
+                {loadingAssessment ? 'Analysing with GPT-4o Vision...' : <><Sparkles className="h-5 w-5"/> Analyze Generation</>}
+              </div>
             </button>
             
             {result && (
-              <div className="mt-4 p-4 border border-meadow/30 bg-meadow/5 rounded-xl">
-                <h4 className="font-bold text-forest mb-2">AI Results</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><strong>System Size:</strong> {result.computed.systemKWp.toFixed(2)} kWp</div>
-                  <div><strong>Annual Gen:</strong> {result.computed.annualKWh.toFixed(0)} kWh</div>
-                  <div><strong>Subsidy Est:</strong> ₹{formatIndianNumber(Math.round(result.computed.subsidy))}</div>
-                  <div><strong>Usable Area:</strong> {result.computed.usableArea.toFixed(0)} m²</div>
+              <div className="mt-6 p-6 border border-meadow/20 bg-meadow/5 rounded-3xl animate-in slide-in-from-bottom-4 duration-500">
+                <h4 className="font-semibold text-forest mb-4 flex items-center gap-2"><CheckCircle2 className="h-5 w-5"/> Assessment Complete</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm mb-6">
+                  <div className="bg-white rounded-2xl p-4 shadow-sm border border-border/50">
+                    <div className="text-muted text-xs mb-1">System Size</div>
+                    <div className="font-bold text-lg text-ink">{result.computed.systemKWp.toFixed(2)} kWp</div>
+                  </div>
+                  <div className="bg-white rounded-2xl p-4 shadow-sm border border-border/50">
+                    <div className="text-muted text-xs mb-1">Annual Gen</div>
+                    <div className="font-bold text-lg text-ink">{result.computed.annualKWh.toFixed(0)} kWh</div>
+                  </div>
+                  <div className="bg-white rounded-2xl p-4 shadow-sm border border-border/50">
+                    <div className="text-muted text-xs mb-1">Est. Subsidy</div>
+                    <div className="font-bold text-lg text-meadow">₹{formatIndianNumber(Math.round(result.computed.subsidy))}</div>
+                  </div>
+                  <div className="bg-white rounded-2xl p-4 shadow-sm border border-border/50">
+                    <div className="text-muted text-xs mb-1">Usable Area</div>
+                    <div className="font-bold text-lg text-ink">{result.computed.usableArea.toFixed(0)} m²</div>
+                  </div>
                 </div>
-                <button onClick={() => setStep(2)} className="mt-4 w-full bg-forest text-white py-2 rounded-lg font-semibold flex justify-center items-center gap-2">
-                  Proceed to Application <ArrowRight className="h-4 w-4"/>
+                <button onClick={() => setStep(2)} className="w-full bg-white border border-meadow/30 text-forest py-3.5 rounded-2xl font-semibold flex justify-center items-center gap-2 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
+                  Proceed to Applicant Details <ArrowRight className="h-4 w-4"/>
                 </button>
               </div>
             )}
@@ -205,110 +220,154 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
       
       case 2:
         return (
-          <div className="space-y-5 animate-in fade-in">
-            <h3 className="text-xl font-bold">Step 2: Consumer Details & Cooking Load</h3>
+          <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+            <div>
+              <h3 className="text-2xl font-semibold tracking-tight text-ink">{userRole === 'vendor' ? 'Client Details & Load' : 'Your Details & Load'}</h3>
+              <p className="text-sm text-muted mt-1">Provide electricity consumption metrics to size the system perfectly.</p>
+            </div>
             
-            <div>
-              <label className="text-sm font-medium mb-1 block">Monthly Electricity Consumption (kWh)</label>
-              <input type="range" min="50" max="1000" name="monthlyConsumption" value={form.monthlyConsumption} onChange={handleFieldChange} className="w-full accent-meadow" />
-              <div className="text-right text-sm font-bold text-meadow">{form.monthlyConsumption} kWh</div>
-              <p className="text-xs text-muted mt-1">If you selected E-Cooking in the Clean Cooking tab, ensure you account for the extra load here.</p>
+            <div className="bg-white/50 backdrop-blur-sm border border-border/70 rounded-3xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.02)] space-y-6">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-sm font-medium text-ink/80">{userRole === 'vendor' ? "Client's" : "Your"} Monthly Consumption</label>
+                  <span className="text-lg font-bold text-meadow bg-meadow/10 px-3 py-1 rounded-full">{form.monthlyConsumption} kWh</span>
+                </div>
+                <input type="range" min="50" max="1000" name="monthlyConsumption" value={form.monthlyConsumption} onChange={handleFieldChange} className="w-full h-2 rounded-full appearance-none bg-border accent-meadow outline-none" />
+                <p className="text-xs text-muted mt-3">If E-Cooking is planned, ensure the extra load is accounted for here.</p>
+              </div>
+
+              <div className="pt-4 border-t border-border/50">
+                <label className="text-sm font-medium text-ink/80 block mb-2">Location / Village</label>
+                <input type="text" name="villageName" value={form.villageName} onChange={handleFieldChange} placeholder="e.g. Bapoli" className="w-full rounded-2xl border border-border/70 bg-white px-4 py-3.5 text-sm text-ink outline-none transition-all focus:border-meadow focus:ring-4 focus:ring-meadow/10 shadow-sm" />
+              </div>
             </div>
 
-            <div>
-              <label className="text-sm font-medium mb-1 block">Village / Location</label>
-              <input type="text" name="villageName" value={form.villageName} onChange={handleFieldChange} placeholder="e.g. Bapoli" className="input-base" />
+            <div className="flex gap-4">
+              <button onClick={() => setStep(1)} className="px-6 py-4 rounded-2xl font-semibold text-muted bg-white border border-border/70 hover:bg-parchment transition-colors shadow-sm"><ArrowLeft className="h-5 w-5"/></button>
+              <button onClick={() => setStep(3)} className="flex-1 bg-forest text-white py-4 rounded-2xl font-semibold flex justify-center items-center gap-2 shadow-md transition-all hover:bg-[#154a33] hover:shadow-lg hover:-translate-y-0.5">
+                Save & Continue <ArrowRight className="h-5 w-5"/>
+              </button>
             </div>
-
-            <button onClick={() => setStep(3)} className="w-full bg-meadow text-white py-3 rounded-xl font-semibold flex justify-center items-center gap-2 mt-4">
-              Save & Next <ArrowRight className="h-4 w-4"/>
-            </button>
           </div>
         );
 
       case 3:
         return (
-          <div className="space-y-5 animate-in fade-in">
-            <h3 className="text-xl font-bold">Step 3: Document Data Capture</h3>
-            <p className="text-sm text-muted">Capture documents for PM Surya Ghar application. AI will verify image clarity.</p>
+          <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+            <div>
+              <h3 className="text-2xl font-semibold tracking-tight text-ink">Document Capture</h3>
+              <p className="text-sm text-muted mt-1">Securely capture high-quality images of required KYC documents.</p>
+            </div>
             
-            <div className="grid gap-3">
+            <div className="grid gap-4">
               {PM_SURYA_MOBILE_DOCS.map((doc) => {
                 const upload = docUploads[doc.id];
                 return (
-                  <div key={doc.id} className="rounded-lg border p-3 flex justify-between items-center bg-parchment/30">
+                  <div key={doc.id} className={`group flex justify-between items-center p-4 rounded-3xl border transition-all duration-300 ${upload ? 'border-meadow/40 bg-meadow/5' : 'border-border/70 bg-white shadow-sm hover:border-meadow/30 hover:shadow-md'}`}>
                     <div>
-                      <div className="font-semibold text-sm">{doc.label}</div>
-                      {upload && <div className="text-xs text-meadow flex items-center gap-1 mt-1"><CheckCircle2 className="h-3 w-3"/> Captured</div>}
+                      <div className="font-semibold text-ink">{doc.label}</div>
+                      {upload ? (
+                        <div className="text-xs font-medium text-meadow flex items-center gap-1.5 mt-1.5"><CheckCircle2 className="h-4 w-4"/> Successfully Captured</div>
+                      ) : (
+                        <div className="text-xs text-muted mt-1">Awaiting capture</div>
+                      )}
                     </div>
                     <input ref={el => docInputRefs.current[doc.id] = el} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleDocCapture(doc.id, e.target.files?.[0])} />
-                    <button onClick={() => docInputRefs.current[doc.id]?.click()} className="p-2 bg-meadow/10 text-meadow rounded-md"><Camera className="h-5 w-5"/></button>
+                    <button onClick={() => docInputRefs.current[doc.id]?.click()} className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-all ${upload ? 'bg-white border border-meadow/20 text-meadow hover:bg-meadow hover:text-white' : 'bg-parchment text-ink hover:bg-meadow hover:text-white'}`}>
+                      <Camera className="h-5 w-5"/>
+                    </button>
                   </div>
                 )
               })}
             </div>
-            <button onClick={() => setStep(4)} className="w-full bg-meadow text-white py-3 rounded-xl font-semibold flex justify-center items-center gap-2 mt-4">
-              Proceed to KYC <ArrowRight className="h-4 w-4"/>
-            </button>
+            
+            <div className="flex gap-4">
+              <button onClick={() => setStep(2)} className="px-6 py-4 rounded-2xl font-semibold text-muted bg-white border border-border/70 hover:bg-parchment transition-colors shadow-sm"><ArrowLeft className="h-5 w-5"/></button>
+              <button onClick={() => setStep(4)} className="flex-1 bg-forest text-white py-4 rounded-2xl font-semibold flex justify-center items-center gap-2 shadow-md transition-all hover:bg-[#154a33] hover:shadow-lg hover:-translate-y-0.5">
+                Proceed to Verification <ArrowRight className="h-5 w-5"/>
+              </button>
+            </div>
           </div>
         );
 
       case 4:
         return (
-          <div className="space-y-5 animate-in fade-in">
-            <h3 className="text-xl font-bold">Step 4: KYC Pre-Check</h3>
-            <p className="text-sm text-muted">Ensure names match across Aadhaar, Electricity Bill, and Bank to prevent subsidy DBT rejection.</p>
+          <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+            <div>
+              <h3 className="text-2xl font-semibold tracking-tight text-ink">KYC Verification</h3>
+              <p className="text-sm text-muted mt-1">Cross-check names to prevent DBT subsidy rejection during disbursement.</p>
+            </div>
             
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="text-xs font-medium text-muted block mb-1">Name on Aadhaar</label>
-                <input type="text" name="aadhaarName" value={form.aadhaarName} onChange={handleFieldChange} className="input-base" />
+            <div className="bg-white/50 backdrop-blur-sm border border-border/70 rounded-3xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.02)] space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label className="text-xs font-semibold text-muted block mb-1.5 uppercase tracking-wider">Aadhaar Name</label>
+                  <input type="text" name="aadhaarName" value={form.aadhaarName} onChange={handleFieldChange} placeholder="Exact spelling on Aadhaar" className="w-full rounded-xl border border-border/70 bg-white px-4 py-3 text-sm text-ink outline-none transition-all focus:border-meadow focus:ring-2 focus:ring-meadow/20 shadow-sm" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted block mb-1.5 uppercase tracking-wider">Electricity Bill Name</label>
+                  <input type="text" name="billName" value={form.billName} onChange={handleFieldChange} placeholder="Exact spelling on Bill" className="w-full rounded-xl border border-border/70 bg-white px-4 py-3 text-sm text-ink outline-none transition-all focus:border-meadow focus:ring-2 focus:ring-meadow/20 shadow-sm" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-semibold text-muted block mb-1.5 uppercase tracking-wider">Bank Account Name</label>
+                  <input type="text" name="bankName" value={form.bankName} onChange={handleFieldChange} placeholder="Exact spelling in Passbook/NPCI" className="w-full rounded-xl border border-border/70 bg-white px-4 py-3 text-sm text-ink outline-none transition-all focus:border-meadow focus:ring-2 focus:ring-meadow/20 shadow-sm" />
+                </div>
               </div>
-              <div>
-                <label className="text-xs font-medium text-muted block mb-1">Name on Electricity Bill</label>
-                <input type="text" name="billName" value={form.billName} onChange={handleFieldChange} className="input-base" />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="text-xs font-medium text-muted block mb-1">Name on Bank Account</label>
-                <input type="text" name="bankName" value={form.bankName} onChange={handleFieldChange} className="input-base" />
+
+              <div className={`mt-2 rounded-2xl border p-5 transition-colors duration-300 ${kycCheck.tone}`}>
+                <div className="font-bold flex items-center gap-2">
+                  {kycCheck.risk === 'low' && <CheckCircle2 className="h-5 w-5" />}
+                  {kycCheck.risk !== 'low' && <AlertTriangle className="h-5 w-5" />}
+                  {kycCheck.label}
+                </div>
+                <div className="text-sm mt-2 leading-relaxed opacity-90">{kycCheck.note}</div>
               </div>
             </div>
 
-            <div className={`mt-4 rounded-xl border p-4 ${kycCheck.tone}`}>
-              <div className="font-bold">{kycCheck.label}</div>
-              <div className="text-sm mt-1">{kycCheck.note}</div>
+            <div className="flex gap-4">
+              <button onClick={() => setStep(3)} className="px-6 py-4 rounded-2xl font-semibold text-muted bg-white border border-border/70 hover:bg-parchment transition-colors shadow-sm"><ArrowLeft className="h-5 w-5"/></button>
+              <button onClick={() => setStep(5)} className="flex-1 bg-forest text-white py-4 rounded-2xl font-semibold flex justify-center items-center gap-2 shadow-md transition-all hover:bg-[#154a33] hover:shadow-lg hover:-translate-y-0.5">
+                Review & Apply <ArrowRight className="h-5 w-5"/>
+              </button>
             </div>
-
-            <button onClick={() => setStep(5)} className="w-full bg-meadow text-white py-3 rounded-xl font-semibold flex justify-center items-center gap-2 mt-4">
-              Finalise Application <ArrowRight className="h-4 w-4"/>
-            </button>
           </div>
         );
       
       case 5:
         return (
-          <div className="space-y-5 animate-in fade-in text-center py-10 border border-dashed border-border rounded-xl">
-            <CheckCircle2 className="h-16 w-16 text-meadow mx-auto mb-4" />
-            <h3 className="text-2xl font-bold">Application Ready</h3>
-            <p className="text-muted max-w-sm mx-auto">All data captured. In a real environment, this data is submitted to the PM Surya Ghar DISCOM portal.</p>
-            <button onClick={handleSaveAssessment} className="bg-forest text-white px-6 py-3 rounded-xl font-bold mt-6 inline-block">
-              Submit to DISCOM Portal
+          <div className="space-y-6 animate-in zoom-in-95 duration-500 text-center py-12 bg-white/50 backdrop-blur-xl border border-border/70 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] px-6">
+            <div className="mx-auto h-24 w-24 rounded-full bg-meadow/10 flex items-center justify-center mb-6">
+              <CheckCircle2 className="h-12 w-12 text-meadow" />
+            </div>
+            <h3 className="text-3xl font-bold tracking-tight text-ink mb-3">Application Ready</h3>
+            <p className="text-muted text-lg max-w-md mx-auto leading-relaxed">
+              All documents and data have been captured and verified. 
+              {userRole === 'vendor' ? " Submit this to the DISCOM portal on behalf of your client." : " Submit this to the DISCOM portal to proceed."}
+            </p>
+            
+            <button onClick={handleSaveAssessment} className="bg-forest text-white px-8 py-4 rounded-2xl font-bold mt-10 inline-flex items-center gap-3 shadow-lg hover:shadow-xl hover:bg-[#154a33] transition-all hover:-translate-y-1">
+              Submit to PM Surya Ghar Portal <ArrowRight className="h-5 w-5" />
             </button>
+            <div className="mt-4">
+              <button onClick={() => setStep(4)} className="text-sm font-semibold text-muted hover:text-ink transition-colors">Wait, I need to edit details</button>
+            </div>
           </div>
         );
 
       default:
         // Steps 6-10 placeholders
         return (
-          <div className="space-y-5 animate-in fade-in text-center py-10 border border-dashed border-border rounded-xl">
-            <h3 className="text-2xl font-bold mb-2">Step {step}: {PM_SURYA_PROCESS_STEPS[step-1]}</h3>
-            <p className="text-muted mb-6">This step happens offline or on the government portal.</p>
-            <div className="flex justify-center gap-4">
-              <button onClick={() => setStep(step - 1)} className="border border-border px-4 py-2 rounded-lg">Back</button>
+          <div className="space-y-6 animate-in fade-in text-center py-12 bg-white/50 backdrop-blur-xl border border-border/70 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] px-6">
+            <h3 className="text-3xl font-bold tracking-tight text-ink mb-3">Step {step}: {PM_SURYA_PROCESS_STEPS[step-1]}</h3>
+            <p className="text-muted text-lg max-w-md mx-auto leading-relaxed mb-10">This process step occurs offline, on the physical site, or directly within the government portal interface.</p>
+            
+            <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+              <button onClick={() => setStep(step - 1)} className="flex-1 bg-white border border-border/70 text-ink font-semibold py-4 rounded-2xl shadow-sm hover:bg-parchment transition-colors">Previous Step</button>
+              
               {step < 10 ? (
-                <button onClick={() => setStep(step + 1)} className="bg-meadow text-white px-4 py-2 rounded-lg">Mark Done & Next</button>
+                <button onClick={() => setStep(step + 1)} className="flex-1 bg-meadow text-white font-semibold py-4 rounded-2xl shadow-md hover:bg-[#276e47] transition-colors">Mark Complete</button>
               ) : (
-                <button onClick={() => setStep(1)} className="bg-forest text-white px-4 py-2 rounded-lg">Start New Application</button>
+                <button onClick={() => { setStep(1); setResult(null); }} className="flex-1 bg-forest text-white font-semibold py-4 rounded-2xl shadow-md hover:bg-[#154a33] transition-colors">Start New App</button>
               )}
             </div>
           </div>
@@ -317,58 +376,61 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
   };
 
   return (
-    <div className="space-y-6 animate-floatin">
-      <div className="flex flex-wrap gap-4 justify-between items-center bg-white p-4 rounded-2xl border border-border">
-        <div>
-          <h2 className="text-xl font-bold">PM Surya Ghar Wizard</h2>
-          <p className="text-sm text-muted">10-step seamless application process</p>
+    <div className="space-y-6 animate-floatin max-w-7xl mx-auto">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white/60 backdrop-blur-xl p-5 rounded-[2rem] border border-white shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
+        <div className="pl-2">
+          <h2 className="text-2xl font-bold tracking-tight text-ink">PM Surya Ghar Flow</h2>
+          <p className="text-sm text-muted mt-0.5">Streamlined 10-step wizard</p>
         </div>
         
-        {/* Vendor vs Household Toggle */}
-        <div className="flex bg-parchment p-1 rounded-lg border border-border">
+        {/* Sleek Apple-like Toggle */}
+        <div className="flex bg-parchment/80 p-1.5 rounded-2xl border border-border/50">
           <button 
             onClick={() => setUserRole('household')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition ${userRole === 'household' ? 'bg-white shadow-sm border border-border text-ink' : 'text-muted'}`}>
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${userRole === 'household' ? 'bg-white shadow-sm border border-border/50 text-ink scale-100' : 'text-muted hover:text-ink/70 scale-95'}`}>
             <UserCircle className="h-4 w-4"/> Household
           </button>
           <button 
             onClick={() => setUserRole('vendor')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition ${userRole === 'vendor' ? 'bg-white shadow-sm border border-border text-ink' : 'text-muted'}`}>
-            <Store className="h-4 w-4"/> Vendor
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${userRole === 'vendor' ? 'bg-white shadow-sm border border-border/50 text-ink scale-100' : 'text-muted hover:text-ink/70 scale-95'}`}>
+            <Store className="h-4 w-4"/> Vendor Mode
           </button>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[250px_1fr] gap-6">
+      <div className="grid lg:grid-cols-[280px_1fr] gap-6">
         {/* Left sidebar: 10 Steps progress */}
-        <div className="bg-white rounded-2xl border border-border p-4 h-fit">
-          <h4 className="font-bold mb-4 text-sm text-muted uppercase">Sequence</h4>
-          <div className="space-y-1">
+        <div className="bg-white/60 backdrop-blur-xl rounded-[2rem] border border-white p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] h-fit sticky top-24">
+          <h4 className="font-bold mb-5 text-xs text-muted uppercase tracking-widest pl-2">Progress</h4>
+          <div className="space-y-1.5">
             {PM_SURYA_PROCESS_STEPS.map((label, index) => {
               const s = index + 1;
-              let statusClass = "text-muted hover:bg-parchment cursor-pointer";
-              if (step === s) statusClass = "bg-meadow/10 text-meadow font-bold border border-meadow/20";
-              else if (step > s) statusClass = "text-ink font-medium cursor-pointer";
+              const isCurrent = step === s;
+              const isPast = step > s;
               
-              // Only allow clicking steps we've reached (simple mock)
+              let statusClass = "text-muted hover:bg-parchment hover:text-ink";
+              if (isCurrent) statusClass = "bg-white text-ink font-bold shadow-sm border border-border/50";
+              else if (isPast) statusClass = "text-ink font-medium bg-meadow/5 hover:bg-meadow/10 border border-transparent";
+              
               return (
-                <div 
+                <button 
                   key={s} 
-                  onClick={() => s <= step ? setStep(s) : null}
-                  className={`flex gap-3 items-center p-2 rounded-lg transition-colors text-xs ${statusClass}`}
+                  onClick={() => setStep(s)}
+                  className={`w-full text-left flex gap-3.5 items-center p-3 rounded-2xl transition-all duration-300 text-xs ${statusClass} group`}
                 >
-                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] ${step > s ? 'bg-meadow text-white' : step === s ? 'bg-meadow text-white' : 'bg-parchment border border-border text-muted'}`}>
-                    {step > s ? <CheckCircle2 className="h-3 w-3"/> : s}
+                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] transition-colors ${isPast ? 'bg-meadow text-white shadow-sm' : isCurrent ? 'bg-forest text-white shadow-md' : 'bg-parchment border border-border/80 text-muted group-hover:bg-white group-hover:border-border'}`}>
+                    {isPast ? <CheckCircle2 className="h-3.5 w-3.5"/> : s}
                   </span>
-                  <span className="line-clamp-2 leading-tight">{label}</span>
-                </div>
+                  <span className="line-clamp-2 leading-relaxed pr-1">{label}</span>
+                </button>
               )
             })}
           </div>
         </div>
 
         {/* Right Content */}
-        <div className="bg-white rounded-2xl border border-border p-6 shadow-sm min-h-[500px]">
+        <div className="min-h-[600px] h-full flex flex-col justify-center">
           {renderStepContent()}
         </div>
       </div>
