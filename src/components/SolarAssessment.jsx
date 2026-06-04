@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { ImagePlus, Satellite, Sparkles, Sun, CheckCircle2, AlertTriangle, Smartphone, Camera, ChevronDown, ArrowRight, ArrowLeft, UserCircle, Store } from 'lucide-react';
+import { ImagePlus, Satellite, Sparkles, Sun, CheckCircle2, AlertTriangle, Smartphone, Camera, ChevronDown, ArrowRight, ArrowLeft, UserCircle, Store, Lock } from 'lucide-react';
 import { stateOptions } from '../data/solarLUT';
 import { formatIndianNumber } from '../utils/indianFormat';
 import { runSolarCalculations } from '../utils/calculations';
@@ -44,6 +44,7 @@ const VENDOR_STEPS = [
 export default function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
   const [step, setStep] = useState(1);
   const [userRole, setUserRole] = useState('household'); // 'household' or 'vendor'
+  const [completedSteps, setCompletedSteps] = useState(new Set());
   
   const currentSteps = userRole === 'vendor' ? VENDOR_STEPS : HOUSEHOLD_STEPS;
   
@@ -98,6 +99,10 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
     setImagePreview(preview);
   };
 
+  const markStepComplete = (s) => {
+    setCompletedSteps(prev => new Set(prev).add(s));
+  };
+
   const runAssessment = async () => {
     if (!imageFile) {
       showToast('Upload a rooftop image first.', 'error');
@@ -122,7 +127,8 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
 
       setResult({ aiResult, computed });
       showToast('AI Rooftop assessment complete.');
-      setStep(2); // Auto-advance to next step
+      markStepComplete(1);
+      setStep(2); 
     } catch (error) {
       showToast(error.message || 'Assessment failed.', 'error');
     } finally {
@@ -155,13 +161,17 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
   });
 
   const handleSaveAssessment = async () => {
-    showToast('Application successfully compiled and ready for submission!');
-    setStep(6);
+    showToast('Process fully completed and saved!');
+    // Final logic could go here
+    setStep(1);
+    setCompletedSteps(new Set());
+    setResult(null);
   };
 
   const handleRoleToggle = (role) => {
     setUserRole(role);
-    setStep(1); // Reset step so we don't go out of bounds of the new array
+    setStep(1); 
+    setCompletedSteps(new Set());
   };
 
   // Render the current step content
@@ -238,8 +248,8 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
                     <div className="font-bold text-lg text-ink">{result.computed.usableArea.toFixed(0)} m²</div>
                   </div>
                 </div>
-                <button onClick={() => setStep(2)} className="w-full bg-white border border-meadow/30 text-forest py-3.5 rounded-2xl font-semibold flex justify-center items-center gap-2 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
-                  Proceed to Applicant Details <ArrowRight className="h-4 w-4"/>
+                <button onClick={() => { markStepComplete(1); setStep(2); }} className="w-full bg-white border border-meadow/30 text-forest py-3.5 rounded-2xl font-semibold flex justify-center items-center gap-2 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
+                  Proceed to Next Step <ArrowRight className="h-4 w-4"/>
                 </button>
               </div>
             )}
@@ -272,7 +282,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
 
             <div className="flex gap-4">
               <button onClick={() => setStep(1)} className="px-6 py-4 rounded-2xl font-semibold text-muted bg-white border border-border/70 hover:bg-parchment transition-colors shadow-sm"><ArrowLeft className="h-5 w-5"/></button>
-              <button onClick={() => setStep(3)} className="flex-1 bg-forest text-white py-4 rounded-2xl font-semibold flex justify-center items-center gap-2 shadow-md transition-all hover:bg-[#154a33] hover:shadow-lg hover:-translate-y-0.5">
+              <button onClick={() => { markStepComplete(2); setStep(3); }} className="flex-1 bg-forest text-white py-4 rounded-2xl font-semibold flex justify-center items-center gap-2 shadow-md transition-all hover:bg-[#154a33] hover:shadow-lg hover:-translate-y-0.5">
                 Save & Continue <ArrowRight className="h-5 w-5"/>
               </button>
             </div>
@@ -311,7 +321,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
             
             <div className="flex gap-4">
               <button onClick={() => setStep(2)} className="px-6 py-4 rounded-2xl font-semibold text-muted bg-white border border-border/70 hover:bg-parchment transition-colors shadow-sm"><ArrowLeft className="h-5 w-5"/></button>
-              <button onClick={() => setStep(4)} className="flex-1 bg-forest text-white py-4 rounded-2xl font-semibold flex justify-center items-center gap-2 shadow-md transition-all hover:bg-[#154a33] hover:shadow-lg hover:-translate-y-0.5">
+              <button onClick={() => { markStepComplete(3); setStep(4); }} className="flex-1 bg-forest text-white py-4 rounded-2xl font-semibold flex justify-center items-center gap-2 shadow-md transition-all hover:bg-[#154a33] hover:shadow-lg hover:-translate-y-0.5">
                 Proceed to Verification <ArrowRight className="h-5 w-5"/>
               </button>
             </div>
@@ -354,52 +364,58 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
 
             <div className="flex gap-4">
               <button onClick={() => setStep(3)} className="px-6 py-4 rounded-2xl font-semibold text-muted bg-white border border-border/70 hover:bg-parchment transition-colors shadow-sm"><ArrowLeft className="h-5 w-5"/></button>
-              <button onClick={() => setStep(5)} className="flex-1 bg-forest text-white py-4 rounded-2xl font-semibold flex justify-center items-center gap-2 shadow-md transition-all hover:bg-[#154a33] hover:shadow-lg hover:-translate-y-0.5">
+              <button onClick={() => { markStepComplete(4); setStep(5); }} className="flex-1 bg-forest text-white py-4 rounded-2xl font-semibold flex justify-center items-center gap-2 shadow-md transition-all hover:bg-[#154a33] hover:shadow-lg hover:-translate-y-0.5">
                 Review & Apply <ArrowRight className="h-5 w-5"/>
               </button>
             </div>
           </div>
         );
-      
-      case 5:
-        return (
-          <div className="space-y-6 animate-in zoom-in-95 duration-500 text-center py-12 bg-white/50 backdrop-blur-xl border border-border/70 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] px-6">
-            <div className="mx-auto h-24 w-24 rounded-full bg-meadow/10 flex items-center justify-center mb-6">
-              <CheckCircle2 className="h-12 w-12 text-meadow" />
-            </div>
-            <h3 className="text-3xl font-bold tracking-tight text-ink mb-3">Application Ready</h3>
-            <p className="text-muted text-lg max-w-md mx-auto leading-relaxed">
-              All documents and data have been captured and verified. 
-              {userRole === 'vendor' ? " Submit this to the DISCOM portal on behalf of your client." : " Submit this to the DISCOM portal to proceed."}
-            </p>
-            
-            <button onClick={handleSaveAssessment} className="bg-forest text-white px-8 py-4 rounded-2xl font-bold mt-10 inline-flex items-center gap-3 shadow-lg hover:shadow-xl hover:bg-[#154a33] transition-all hover:-translate-y-1">
-              Submit to PM Surya Ghar Portal <ArrowRight className="h-5 w-5" />
-            </button>
-            <div className="mt-4">
-              <button onClick={() => setStep(4)} className="text-sm font-semibold text-muted hover:text-ink transition-colors">Wait, I need to edit details</button>
-            </div>
-          </div>
-        );
 
-      default:
-        // Remaining placeholders
+      default: {
+        const isFinalStep = step === currentSteps.length;
+        const missingSteps = currentSteps.length - 1 - completedSteps.size;
+        const canSubmit = missingSteps <= 0;
+
         return (
           <div className="space-y-6 animate-in fade-in text-center py-12 bg-white/50 backdrop-blur-xl border border-border/70 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] px-6">
+            
+            {isFinalStep ? (
+              <div className="mx-auto h-24 w-24 rounded-full bg-meadow/10 flex items-center justify-center mb-6">
+                <CheckCircle2 className="h-12 w-12 text-meadow" />
+              </div>
+            ) : null}
+
             <h3 className="text-3xl font-bold tracking-tight text-ink mb-3">Step {step}: {currentSteps[step-1]}</h3>
             <p className="text-muted text-lg max-w-md mx-auto leading-relaxed mb-10">This process step occurs offline, on the physical site, or directly within the government portal interface.</p>
             
-            <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
-              <button onClick={() => setStep(step - 1)} className="flex-1 bg-white border border-border/70 text-ink font-semibold py-4 rounded-2xl shadow-sm hover:bg-parchment transition-colors">Previous Step</button>
-              
-              {step < currentSteps.length ? (
-                <button onClick={() => setStep(step + 1)} className="flex-1 bg-meadow text-white font-semibold py-4 rounded-2xl shadow-md hover:bg-[#276e47] transition-colors">Mark Complete</button>
-              ) : (
-                <button onClick={() => { setStep(1); setResult(null); }} className="flex-1 bg-forest text-white font-semibold py-4 rounded-2xl shadow-md hover:bg-[#154a33] transition-colors">Start New App</button>
-              )}
-            </div>
+            {isFinalStep ? (
+              <div className="mt-8">
+                <button 
+                  onClick={handleSaveAssessment} 
+                  disabled={!canSubmit}
+                  className={`px-8 py-4 rounded-2xl font-bold inline-flex items-center gap-3 transition-all duration-300 ${
+                    canSubmit 
+                      ? 'bg-forest text-white shadow-lg hover:shadow-xl hover:bg-[#154a33] hover:-translate-y-1' 
+                      : 'bg-parchment text-muted cursor-not-allowed border border-border'
+                  }`}
+                >
+                  {canSubmit ? (
+                    <>Submit Full Application <ArrowRight className="h-5 w-5" /></>
+                  ) : (
+                    <><Lock className="h-5 w-5" /> Complete {missingSteps} more steps to submit</>
+                  )}
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+                <button onClick={() => setStep(step - 1)} className="flex-1 bg-white border border-border/70 text-ink font-semibold py-4 rounded-2xl shadow-sm hover:bg-parchment transition-colors">Previous</button>
+                
+                <button onClick={() => { markStepComplete(step); setStep(step + 1); }} className="flex-1 bg-meadow text-white font-semibold py-4 rounded-2xl shadow-md hover:bg-[#276e47] transition-colors">Mark Complete</button>
+              </div>
+            )}
           </div>
         );
+      }
     }
   };
 
@@ -435,11 +451,11 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
             {currentSteps.map((label, index) => {
               const s = index + 1;
               const isCurrent = step === s;
-              const isPast = step > s;
+              const isCompleted = completedSteps.has(s);
               
               let statusClass = "text-muted hover:bg-parchment hover:text-ink";
               if (isCurrent) statusClass = "bg-white text-ink font-bold shadow-sm border border-border/50";
-              else if (isPast) statusClass = "text-ink font-medium bg-meadow/5 hover:bg-meadow/10 border border-transparent";
+              else if (isCompleted) statusClass = "text-ink font-medium bg-meadow/5 hover:bg-meadow/10 border border-transparent";
               
               return (
                 <button 
@@ -447,8 +463,8 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
                   onClick={() => setStep(s)}
                   className={`w-full text-left flex gap-3.5 items-center p-3 rounded-2xl transition-all duration-300 text-xs ${statusClass} group`}
                 >
-                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] transition-colors ${isPast ? 'bg-meadow text-white shadow-sm' : isCurrent ? 'bg-forest text-white shadow-md' : 'bg-parchment border border-border/80 text-muted group-hover:bg-white group-hover:border-border'}`}>
-                    {isPast ? <CheckCircle2 className="h-3.5 w-3.5"/> : s}
+                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] transition-colors ${isCompleted ? 'bg-meadow text-white shadow-sm' : isCurrent ? 'bg-forest text-white shadow-md' : 'bg-parchment border border-border/80 text-muted group-hover:bg-white group-hover:border-border'}`}>
+                    {isCompleted ? <CheckCircle2 className="h-3.5 w-3.5"/> : s}
                   </span>
                   <span className="line-clamp-2 leading-relaxed pr-1">{label}</span>
                 </button>
