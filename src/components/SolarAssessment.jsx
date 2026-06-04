@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { ImagePlus, Satellite, Sparkles, Save, Sun } from 'lucide-react';
+import { ImagePlus, Satellite, Sparkles, Save, Sun, AlertTriangle, CheckCircle2, Smartphone } from 'lucide-react';
 import SkeletonLoader from './SkeletonLoader';
 import { stateOptions } from '../data/solarLUT';
 import { formatIndianNumber } from '../utils/indianFormat';
@@ -47,6 +47,45 @@ const ASSESSMENT_STEPS = [
   'Running solar calculations…',
 ];
 
+const PM_SURYA_PROCESS_STEPS = [
+  'Register consumer mobile number on PM Surya Ghar portal.',
+  'Complete profile with name, address, state, district and PIN.',
+  'Choose DISCOM and fetch consumer account details.',
+  'Submit rooftop application and wait for feasibility approval.',
+  'Select empanelled vendor and finalise technical proposal.',
+  'Collect KYC documents and upload clear mobile scans/photos.',
+  'Install plant as per sanctioned capacity and DISCOM norms.',
+  'Request DISCOM inspection and net-metering approval.',
+  'Upload commissioning proof and vendor completion report.',
+  'Track subsidy disbursal to beneficiary bank account.',
+];
+
+const MOBILE_DOCS = [
+  'Aadhaar (front + back)',
+  'Latest electricity bill',
+  'Bank passbook / cancelled cheque',
+  'Roof ownership / NOC proof',
+  'Applicant passport photo',
+  'Site photos (roof + meter board)',
+];
+
+const normalizeName = (value = '') =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const tokenSet = (name = '') => new Set(normalizeName(name).split(' ').filter(Boolean));
+
+const nameSimilarity = (left = '', right = '') => {
+  const a = tokenSet(left);
+  const b = tokenSet(right);
+  if (!a.size || !b.size) return 0;
+  const common = [...a].filter((t) => b.has(t)).length;
+  return common / Math.max(a.size, b.size);
+};
+
 function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
   const fileInputRef = useRef(null);
   const [form, setForm] = useState({
@@ -56,7 +95,14 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
     monthlyConsumption: 300,
     estimatedMonthlyIncome: 15000,
     villageName: '',
+    aadhaarName: '',
+    billName: '',
+    aadhaarNumber: '',
+    photoMatchConfirmed: 'yes',
   });
+  const [docChecklist, setDocChecklist] = useState(
+    MOBILE_DOCS.reduce((acc, doc) => ({ ...acc, [doc]: false }), {}),
+  );
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [loadingAssessment, setLoadingAssessment] = useState(false);
@@ -69,6 +115,52 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
   const selectedState = useMemo(
     () => stateOptions.find((item) => item.value === form.state) || stateOptions[0],
     [form.state],
+  );
+
+  const kycCheck = useMemo(() => {
+    const aadhaar = normalizeName(form.aadhaarName);
+    const bill = normalizeName(form.billName);
+    const hasNames = Boolean(aadhaar && bill);
+    const sameName = hasNames && aadhaar === bill;
+    const similarity = nameSimilarity(form.aadhaarName, form.billName);
+    const partial = hasNames && !sameName && similarity >= 0.5;
+    const aadhaarValid = /^\d{12}$/.test((form.aadhaarNumber || '').replace(/\s+/g, ''));
+    const photoMatch = form.photoMatchConfirmed === 'yes';
+
+    if (!hasNames) {
+      return {
+        tone: 'border-border bg-parchment/40 text-muted',
+        label: 'Pending KYC pre-check',
+        note: 'Enter Aadhaar name and electricity-bill name to detect mismatch risk early.',
+      };
+    }
+
+    if (sameName) {
+      return {
+        tone: 'border-meadow/25 bg-meadow/10 text-meadow',
+        label: 'Name match: low rejection risk',
+        note: 'Aadhaar and bill name match. Continue with vendor quote and DISCOM feasibility.',
+      };
+    }
+
+    if (partial && aadhaarValid && photoMatch) {
+      return {
+        tone: 'border-amber/30 bg-amber/10 text-amber',
+        label: 'Partial mismatch: needs supporting papers',
+        note: 'Likely resolvable with self-declaration affidavit + ownership/NOC + same Aadhaar proof.',
+      };
+    }
+
+    return {
+      tone: 'border-red-200 bg-red-50 text-red-600',
+      label: 'High mismatch risk',
+      note: 'Correct profile details before submission. Collect affidavit and verify identity at DISCOM helpdesk.',
+    };
+  }, [form.aadhaarName, form.billName, form.aadhaarNumber, form.photoMatchConfirmed]);
+
+  const docsCollectedCount = useMemo(
+    () => Object.values(docChecklist).filter(Boolean).length,
+    [docChecklist],
   );
 
   const handleFieldChange = (event) => {
@@ -392,6 +484,89 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
             />
           </div>
 
+          {/* PM Surya Ghar KYC mismatch resolver */}
+          <div className="rounded-card border border-border bg-parchment/40 p-4">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted">PM Surya Ghar KYC pre-check</div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted">Name as per Aadhaar</label>
+                <input
+                  type="text"
+                  name="aadhaarName"
+                  value={form.aadhaarName}
+                  onChange={handleFieldChange}
+                  placeholder="e.g. RAVI KUMAR"
+                  className="input-base"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted">Name as per electricity bill</label>
+                <input
+                  type="text"
+                  name="billName"
+                  value={form.billName}
+                  onChange={handleFieldChange}
+                  placeholder="e.g. RAVI KUMAR SHARMA"
+                  className="input-base"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted">Aadhaar number (12 digits)</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={12}
+                  name="aadhaarNumber"
+                  value={form.aadhaarNumber}
+                  onChange={(e) => setForm((c) => ({ ...c, aadhaarNumber: e.target.value.replace(/\D/g, '') }))}
+                  placeholder="XXXXXXXXXXXX"
+                  className="input-base"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted">Photo matches Aadhaar?</label>
+                <select
+                  name="photoMatchConfirmed"
+                  value={form.photoMatchConfirmed}
+                  onChange={handleFieldChange}
+                  className="input-base"
+                >
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </div>
+            </div>
+            <div className={`mt-3 rounded-xl border px-3 py-2 text-xs ${kycCheck.tone}`}>
+              <div className="font-semibold">{kycCheck.label}</div>
+              <div className="mt-1">{kycCheck.note}</div>
+            </div>
+          </div>
+
+          {/* Mobile document collection tracker */}
+          <div className="rounded-card border border-aqua/20 bg-aqua-light/5 p-4">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-aqua-deep">
+                <Smartphone className="h-3.5 w-3.5" /> Mobile Document Collection
+              </div>
+              <div className="text-xs font-semibold text-aqua-deep">{docsCollectedCount}/{MOBILE_DOCS.length}</div>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {MOBILE_DOCS.map((doc) => (
+                <label key={doc} className="flex items-center gap-2 rounded-lg border border-border/60 bg-white px-2.5 py-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(docChecklist[doc])}
+                    onChange={() => setDocChecklist((c) => ({ ...c, [doc]: !c[doc] }))}
+                  />
+                  <span className="text-ink">{doc}</span>
+                </label>
+              ))}
+            </div>
+            <p className="mt-2 text-[11px] text-muted">
+              Capture clear photos in daylight. Keep file size under 2 MB per document for faster portal upload.
+            </p>
+          </div>
+
           {form.buildingType === 'residential' && (
             <div>
               <div className="mb-2 flex items-center justify-between">
@@ -420,6 +595,20 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
             <Sparkles className="h-4 w-4" />
             Run Solar Assessment
           </button>
+
+          <div className="rounded-card border border-forest/20 bg-forest/5 p-4">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-forest">PM Surya Ghar: 10-step guided process</div>
+            <ol className="space-y-1.5 text-xs text-ink">
+              {PM_SURYA_PROCESS_STEPS.map((step, index) => (
+                <li key={step} className="flex gap-2">
+                  <span className="mt-[2px] inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-forest/15 text-[10px] font-bold text-forest">
+                    {index + 1}
+                  </span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
 
@@ -635,6 +824,30 @@ function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
                 </div>
                 <div className="mt-3 text-xs text-muted">
                   Recommended channel: <span className="font-semibold text-ink">{result.computed.loanFeasibility.recommendedChannel}</span>
+                </div>
+              </div>
+            )}
+
+            {result.computed.flow === 'residential' && (
+              <div className="rounded-card border border-border bg-white p-5">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted">Ground challenges observed in government workflow</div>
+                <div className="grid gap-2 text-xs sm:grid-cols-2">
+                  <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-red-700">
+                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    Name mismatch between Aadhaar and electricity bill.
+                  </div>
+                  <div className="flex items-start gap-2 rounded-lg border border-amber/30 bg-amber/10 px-3 py-2 text-amber-800">
+                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    Delay in DISCOM feasibility, inspection and net-metering.
+                  </div>
+                  <div className="flex items-start gap-2 rounded-lg border border-amber/30 bg-amber/10 px-3 py-2 text-amber-800">
+                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    Loan/CIBIL friction for low-income rural households.
+                  </div>
+                  <div className="flex items-start gap-2 rounded-lg border border-meadow/20 bg-meadow/10 px-3 py-2 text-meadow">
+                    <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    Mobile document checklist reduces rejection and rework.
+                  </div>
                 </div>
               </div>
             )}
