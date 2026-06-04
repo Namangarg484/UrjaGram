@@ -11,7 +11,6 @@ import { analyzeDocumentImage } from '../utils/documentQuality';
 import {
   evaluatePmSuryaKyc,
   PM_SURYA_MOBILE_DOCS,
-  PM_SURYA_PROCESS_STEPS,
 } from '../utils/pmSuryaKyc';
 
 const roofTypeOptions = [
@@ -20,9 +19,33 @@ const roofTypeOptions = [
   { value: 'mixed', label: 'Mixed' },
 ];
 
+const HOUSEHOLD_STEPS = [
+  'Register mobile number on PM Surya Ghar portal',
+  'Complete profile — name, address, DISCOM details',
+  'Select DISCOM and fetch consumer account',
+  'Submit rooftop application & wait for feasibility',
+  'Select MNRE-empanelled vendor',
+  'Collect KYC documents and upload clear scans',
+  'Install plant as per sanctioned capacity',
+  'Request DISCOM inspection and net-metering',
+  'Upload commissioning certificate',
+  'Track CFA subsidy disbursal (DBT)'
+];
+
+const VENDOR_STEPS = [
+  'Client Site AI Assessment',
+  'Technical Proposal & Load Calculation',
+  'Collect Client KYC Documents',
+  'KYC Pre-Check & Verification',
+  'Submit Technical Proposal to DISCOM',
+  'Install Plant & Upload Commissioning Report'
+];
+
 export default function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
   const [step, setStep] = useState(1);
   const [userRole, setUserRole] = useState('household'); // 'household' or 'vendor'
+  
+  const currentSteps = userRole === 'vendor' ? VENDOR_STEPS : HOUSEHOLD_STEPS;
   
   const fileInputRef = useRef(null);
   const docInputRefs = useRef({});
@@ -136,6 +159,11 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
     setStep(6);
   };
 
+  const handleRoleToggle = (role) => {
+    setUserRole(role);
+    setStep(1); // Reset step so we don't go out of bounds of the new array
+  };
+
   // Render the current step content
   const renderStepContent = () => {
     switch (step) {
@@ -143,7 +171,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
         return (
           <div className="space-y-6 animate-in fade-in">
             <div>
-              <h3 className="text-2xl font-semibold tracking-tight text-ink">Rooftop Generation Assessment</h3>
+              <h3 className="text-2xl font-semibold tracking-tight text-ink">{userRole === 'vendor' ? 'Client Site AI Assessment' : 'Rooftop Generation Assessment'}</h3>
               <p className="text-sm text-muted mt-1">Upload a clear satellite or drone image of the {userRole === 'vendor' ? "client's" : "your"} rooftop.</p>
             </div>
             
@@ -355,16 +383,16 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
         );
 
       default:
-        // Steps 6-10 placeholders
+        // Remaining placeholders
         return (
           <div className="space-y-6 animate-in fade-in text-center py-12 bg-white/50 backdrop-blur-xl border border-border/70 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] px-6">
-            <h3 className="text-3xl font-bold tracking-tight text-ink mb-3">Step {step}: {PM_SURYA_PROCESS_STEPS[step-1]}</h3>
+            <h3 className="text-3xl font-bold tracking-tight text-ink mb-3">Step {step}: {currentSteps[step-1]}</h3>
             <p className="text-muted text-lg max-w-md mx-auto leading-relaxed mb-10">This process step occurs offline, on the physical site, or directly within the government portal interface.</p>
             
             <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
               <button onClick={() => setStep(step - 1)} className="flex-1 bg-white border border-border/70 text-ink font-semibold py-4 rounded-2xl shadow-sm hover:bg-parchment transition-colors">Previous Step</button>
               
-              {step < 10 ? (
+              {step < currentSteps.length ? (
                 <button onClick={() => setStep(step + 1)} className="flex-1 bg-meadow text-white font-semibold py-4 rounded-2xl shadow-md hover:bg-[#276e47] transition-colors">Mark Complete</button>
               ) : (
                 <button onClick={() => { setStep(1); setResult(null); }} className="flex-1 bg-forest text-white font-semibold py-4 rounded-2xl shadow-md hover:bg-[#154a33] transition-colors">Start New App</button>
@@ -381,18 +409,18 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white/60 backdrop-blur-xl p-5 rounded-[2rem] border border-white shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
         <div className="pl-2">
           <h2 className="text-2xl font-bold tracking-tight text-ink">PM Surya Ghar Flow</h2>
-          <p className="text-sm text-muted mt-0.5">Streamlined 10-step wizard</p>
+          <p className="text-sm text-muted mt-0.5">Streamlined {currentSteps.length}-step wizard</p>
         </div>
         
         {/* Sleek Apple-like Toggle */}
         <div className="flex bg-parchment/80 p-1.5 rounded-2xl border border-border/50">
           <button 
-            onClick={() => setUserRole('household')}
+            onClick={() => handleRoleToggle('household')}
             className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${userRole === 'household' ? 'bg-white shadow-sm border border-border/50 text-ink scale-100' : 'text-muted hover:text-ink/70 scale-95'}`}>
             <UserCircle className="h-4 w-4"/> Household
           </button>
           <button 
-            onClick={() => setUserRole('vendor')}
+            onClick={() => handleRoleToggle('vendor')}
             className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${userRole === 'vendor' ? 'bg-white shadow-sm border border-border/50 text-ink scale-100' : 'text-muted hover:text-ink/70 scale-95'}`}>
             <Store className="h-4 w-4"/> Vendor Mode
           </button>
@@ -400,11 +428,11 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
       </div>
 
       <div className="grid lg:grid-cols-[280px_1fr] gap-6">
-        {/* Left sidebar: 10 Steps progress */}
+        {/* Left sidebar: Steps progress */}
         <div className="bg-white/60 backdrop-blur-xl rounded-[2rem] border border-white p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] h-fit sticky top-24">
           <h4 className="font-bold mb-5 text-xs text-muted uppercase tracking-widest pl-2">Progress</h4>
           <div className="space-y-1.5">
-            {PM_SURYA_PROCESS_STEPS.map((label, index) => {
+            {currentSteps.map((label, index) => {
               const s = index + 1;
               const isCurrent = step === s;
               const isPast = step > s;
