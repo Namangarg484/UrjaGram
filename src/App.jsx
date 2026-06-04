@@ -1,4 +1,4 @@
-import { Bell, FileText, LayoutDashboard, Map, Search, Settings, Sun, BarChart2, Wifi, WifiOff, Droplets } from 'lucide-react';
+import { Bell, Flame, LayoutDashboard, Settings, Sun, Wifi, WifiOff } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -8,6 +8,7 @@ import ViIPGenerator from './components/ViIPGenerator';
 import MRVDashboard from './components/MRVDashboard';
 import SchemeFinder from './components/SchemeFinder';
 import WaterSolar from './components/WaterSolar';
+import CleanCooking from './components/CleanCooking';
 import Toast from './components/Toast';
 import SettingsModal from './components/SettingsModal';
 import ProfileModal from './components/ProfileModal';
@@ -22,12 +23,8 @@ import { initialAssessments, initialMrvRecords, initialVillages } from './data/s
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard',         icon: LayoutDashboard },
-  { id: 'solar',     label: 'Solar Assessment',   icon: Sun },
-  { id: 'water',     label: 'Water + Solar',       icon: Droplets },
-  { id: 'map',       label: 'Village Map',        icon: Map },
-  { id: 'viip',      label: 'ViIP Generator',     icon: FileText },
-  { id: 'mrv',       label: 'MRV Dashboard',      icon: BarChart2 },
-  { id: 'schemes',   label: 'Scheme Finder',      icon: Search },
+  { id: 'suryaghar', label: 'PM Surya Ghar',     icon: Sun },
+  { id: 'cooking',   label: 'Clean Cooking',     icon: Flame },
 ];
 
 const STATIC_USER = { name: 'Field User', role: 'Field Officer', initials: 'FU', email: '' };
@@ -195,12 +192,8 @@ function App() {
   const renderModule = () => {
     switch (activeModule) {
       case 'dashboard': return <Dashboard villages={villages} assessments={assessments} mrvRecords={mrvRecords} />;
-      case 'solar':     return <SolarAssessment {...sharedModuleProps} />;
-      case 'water':     return <WaterSolar showToast={showToast} />;
-      case 'map':       return <VillageMap villages={villages} assessments={assessments} showToast={showToast} />;
-      case 'viip':      return <ViIPGenerator {...sharedModuleProps} />;
-      case 'mrv':       return <MRVDashboard villages={villages} mrvRecords={mrvRecords} assessments={assessments} showToast={showToast} />;
-      case 'schemes':   return <SchemeFinder addSchemeToViip={addSchemeToViip} showToast={showToast} />;
+      case 'suryaghar': return <SolarAssessment {...sharedModuleProps} />;
+      case 'cooking':   return <CleanCooking showToast={showToast} />;
       default:          return <Dashboard villages={villages} assessments={assessments} mrvRecords={mrvRecords} />;
     }
   };
