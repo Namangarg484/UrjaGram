@@ -61,6 +61,11 @@ const estimateMonthlyDemand = (appliances) => {
   let monthlyKwh = dailyKwh * 30;
   monthlyKwh = monthlyKwh * (1 + ((Number(appliances.familySize) || 5) * 0.02));
 
+  // Future Demand Prediction (EV / Appliance Upgrade)
+  if (appliances.futureGrowth) {
+    monthlyKwh = monthlyKwh * 1.30; // 30% increase for future lifestyle creep
+  }
+
   return Math.round(Math.max(50, monthlyKwh));
 };
 
@@ -91,7 +96,8 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
   const [appliances, setAppliances] = useState({
     familySize: 5, rooms: 2, fans: 3, tvs: 1, acs: 1, coolers: 0,
     fridge: true, geysers: 0, heaters: 0, mixer: true,
-    washingMachine: true, pump: false, bulbs: 6, supplyHours: 10
+    washingMachine: true, pump: false, bulbs: 6, supplyHours: 10,
+    futureGrowth: false
   });
 
   const predictedLoad = estimateMonthlyDemand(appliances);
@@ -432,7 +438,8 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
                   { label: "Refrigerator", name: "fridge" },
                   { label: "Mixer/Grinder", name: "mixer" },
                   { label: "Washing Machine", name: "washingMachine" },
-                  { label: "Water Pump", name: "pump" }
+                  { label: "Water Pump", name: "pump" },
+                  { label: "Plan for Future EV/AC Upgrade (+30%)", name: "futureGrowth" }
                 ].map((chk) => (
                   <label key={chk.name} className={`flex items-center gap-2.5 text-sm font-bold cursor-pointer px-4 py-2.5 rounded-xl border transition-all ${appliances[chk.name] ? 'bg-emerald-50 border-emerald-200 text-emerald-800 shadow-sm' : 'bg-white/60 border-white text-muted hover:border-emerald-200 hover:text-ink shadow-sm'}`}>
                     <input type="checkbox" name={chk.name} checked={appliances[chk.name]} onChange={handleApplianceChange} className="w-4 h-4 text-emerald-500 rounded border-gray-300 focus:ring-emerald-500 accent-emerald-500" />
