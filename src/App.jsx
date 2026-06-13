@@ -145,13 +145,13 @@ function App() {
           />
 
           <main className="min-w-0 flex-1 overflow-hidden z-10">
-            <div className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-white/10 bg-slate-900/20 px-4 backdrop-blur-2xl md:px-6">
+            <div className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-white/60 bg-white/40 px-4 backdrop-blur-2xl md:px-6">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-white">
+                <span className="text-sm font-bold text-slate-900">
                   {NAV_ITEMS.find((n) => n.id === activeModule)?.label ?? 'Dashboard'}
                 </span>
-                <span className="hidden text-white/40 sm:inline">/</span>
-                <span className="hidden text-xs text-emerald-400 font-medium tracking-wide uppercase sm:inline">UrjaGram VET-OS</span>
+                <span className="hidden text-slate-400 sm:inline">/</span>
+                <span className="hidden text-xs text-emerald-700 font-bold tracking-wide uppercase sm:inline">UrjaGram VET-OS</span>
               </div>
               <div className="flex items-center gap-2">
                 <span
@@ -166,14 +166,14 @@ function App() {
                 <button
                   onClick={() => setSettingsOpen(true)}
                   title="Settings"
-                  className="hidden h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white backdrop-blur-md transition hover:border-emerald-400 hover:bg-emerald-400/20 sm:flex pointer-events-auto"
+                  className="hidden h-9 w-9 items-center justify-center rounded-full border border-white/60 bg-white/40 text-slate-600 backdrop-blur-md transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 sm:flex pointer-events-auto"
                 >
                   <Settings className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setProfileOpen(true)}
                   title="Your profile"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-xs font-bold text-slate-900 ring-2 ring-transparent transition hover:ring-emerald-400/50 pointer-events-auto shadow-[0_0_15px_rgba(52,211,153,0.5)]"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-emerald-100 to-emerald-300 text-xs font-bold text-emerald-900 ring-2 ring-transparent transition hover:ring-emerald-300/50 pointer-events-auto shadow-[0_0_15px_rgba(255,255,255,0.8)]"
                 >
                   {user.initials}
                 </button>

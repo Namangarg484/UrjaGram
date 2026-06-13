@@ -8,19 +8,19 @@
   --color-amber: #f59e0b;
   --color-parchment: #ffffff;
   --color-card: #ffffff;
-  --color-ink: #f8fafc;
-  --color-muted: #94a3b8;
-  --color-border: rgba(255, 255, 255, 0.15);
-  /* VisionOS / Premium Shadows */
-  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.15);
-  --shadow-lift: 0 16px 48px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+  --color-ink: #1e293b;
+  --color-muted: #64748b;
+  --color-border: rgba(255, 255, 255, 0.4);
+  /* Apple-style Light Premium Shadows */
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  --shadow-lift: 0 12px 32px rgba(0, 0, 0, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.8);
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 body {
-  @apply m-0 font-sans antialiased text-ink;
+  @apply m-0 font-sans antialiased text-slate-800;
   font-family: 'Outfit', sans-serif;
-  background-color: transparent; /* Relying on the 3D Canvas behind it */
+  background-color: transparent;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -29,49 +29,49 @@ body {
 button, input, select, textarea { font: inherit; }
 
 ::selection {
-  background: rgba(16, 185, 129, 0.4);
-  color: white;
+  background: rgba(16, 185, 129, 0.2);
+  color: #064e3b;
 }
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.25);
 }
 
-/* ── VisionOS Glass Surfaces ────────────────────────────────────────────── */
+/* ── Apple-like Light Glass Surfaces ───────────────────────────────────── */
 .card {
-  @apply rounded-3xl border border-white/10 bg-slate-900/40 backdrop-blur-3xl text-white;
+  @apply rounded-3xl border border-white/60 bg-white/40 backdrop-blur-3xl text-slate-800;
   box-shadow: var(--shadow-card);
   transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-spring), background 0.4s ease;
 }
 .card:hover {
-  @apply bg-slate-900/50 border-white/20;
-  transform: translateY(-4px) scale(1.01);
+  @apply bg-white/50 border-white/80;
+  transform: translateY(-2px) scale(1.005);
   box-shadow: var(--shadow-lift);
 }
 
 .glass {
-  @apply rounded-[2rem] border border-white/10 bg-slate-900/30 backdrop-blur-[40px] text-white;
+  @apply rounded-[2rem] border border-white/50 bg-white/30 backdrop-blur-[40px] text-slate-800;
   box-shadow: var(--shadow-card);
 }
 
 .panel-3d {
-  @apply rounded-[2.5rem] border border-white/20 bg-slate-800/40 backdrop-blur-3xl;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), var(--shadow-lift);
+  @apply rounded-[2.5rem] border border-white/70 bg-white/50 backdrop-blur-3xl;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), var(--shadow-lift);
 }
 
-/* ── Premium Inputs ────────────────────────────────────────────────────── */
+/* ── Premium Light Inputs ──────────────────────────────────────────────── */
 .input-base {
-  @apply w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none backdrop-blur-xl placeholder-white/40;
+  @apply w-full rounded-2xl border border-white/40 bg-white/60 px-4 py-3 text-sm text-slate-900 outline-none backdrop-blur-xl placeholder-slate-400;
   transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 .input-base:focus {
-  @apply border-emerald-400 bg-white/10;
-  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+  @apply border-emerald-400 bg-white/80;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
 }
 
 .badge {
@@ -80,14 +80,14 @@ button, input, select, textarea { font: inherit; }
 
 /* ── Glowing Buttons ───────────────────────────────────────────────────── */
 .btn-grad {
-  @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl px-6 py-3.5 text-sm font-bold text-emerald-950;
-  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl px-6 py-3.5 text-sm font-bold text-white;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4);
   transition: transform 0.3s var(--ease-spring), box-shadow 0.3s var(--ease-spring);
 }
 .btn-grad:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.6);
 }
 .btn-grad:active {
   transform: translateY(1px) scale(0.98);
@@ -99,11 +99,11 @@ button, input, select, textarea { font: inherit; }
 
 .btn-aqua {
   @apply text-white;
-  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4);
 }
 .btn-aqua:hover {
-  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.6);
 }
 
 /* Dynamic sheen */
@@ -112,7 +112,7 @@ button, input, select, textarea { font: inherit; }
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%);
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
   transform: translateX(-150%);
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
