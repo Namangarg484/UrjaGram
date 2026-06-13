@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Sky, Environment, ContactShadows, Float, Cloud, Clouds } from '@react-three/drei';
+import * as THREE from 'three';
 
 export default function Environment3D() {
   const cloudsRef = useRef();
@@ -33,7 +34,7 @@ export default function Environment3D() {
 
       {/* Gentle moving clouds for ambiance */}
       <group ref={cloudsRef} position={[0, 10, -10]}>
-        <Clouds material="MeshBasicMaterial">
+        <Clouds material={THREE.MeshBasicMaterial}>
           <Cloud segments={40} bounds={[10, 2, 2]} volume={10} color="#ffffff" position={[-10, 0, 0]} speed={0.2} />
           <Cloud segments={40} bounds={[10, 2, 2]} volume={10} color="#ffffff" position={[10, 5, -5]} speed={0.3} />
         </Clouds>
