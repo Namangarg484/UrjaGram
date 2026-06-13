@@ -12,6 +12,7 @@ import CleanCooking from './components/CleanCooking';
 import Toast from './components/Toast';
 import SettingsModal from './components/SettingsModal';
 import ProfileModal from './components/ProfileModal';
+import StorybookLanding from './components/StorybookLanding';
 import {
   fetchVillages,
   fetchAssessments,
@@ -60,6 +61,7 @@ function loadStored(key, fallback) {
 }
 
 function App() {
+  const [showLanding, setShowLanding] = useState(true);
   const [activeModule, setActiveModule] = useState('dashboard');
   const [villages, setVillages] = useState(initialVillages);
   const [assessments, setAssessments] = useState(initialAssessments);
@@ -197,6 +199,10 @@ function App() {
       default:          return <Dashboard villages={villages} assessments={assessments} mrvRecords={mrvRecords} />;
     }
   };
+
+  if (showLanding) {
+    return <StorybookLanding onEnter={() => setShowLanding(false)} />;
+  }
 
   return (
     <div className="min-h-screen bg-transparent text-ink">
