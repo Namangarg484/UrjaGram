@@ -96,6 +96,8 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
 
   const predictedLoad = estimateMonthlyDemand(appliances);
   const estimatedBill = predictedLoad * 5; // AI Forecast repo uses approx 5 INR/kWh
+  const fiveYearSavings = Math.round(estimatedBill * 12 * 5.52); // Assuming ~5% annual tariff inflation
+
   let loadCategory = { label: 'Cluster A: Low', color: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-500/20', text: 'text-blue-100' };
   if (predictedLoad > 100 && predictedLoad <= 300) {
     loadCategory = { label: 'Cluster B: Medium', color: 'from-emerald-500 to-teal-600', shadow: 'shadow-emerald-500/20', text: 'text-emerald-100' };
@@ -395,6 +397,10 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
                   <div className="flex flex-col sm:items-end bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex-1">
                     <div className={`text-[10px] font-bold ${loadCategory.text} uppercase tracking-widest mb-1`}>Est. CO₂ Offset</div>
                     <div className="text-2xl font-bold text-white flex items-center gap-1">~{(predictedLoad * 0.82).toFixed(1)} <span className="text-sm font-medium opacity-80">kg</span></div>
+                  </div>
+                  <div className="flex flex-col sm:items-end bg-white/20 backdrop-blur-md border border-white/40 rounded-2xl p-4 flex-1 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                    <div className={`text-[10px] font-bold text-white uppercase tracking-widest mb-1 flex items-center gap-1`}><Zap className="w-3 h-3 text-yellow-300"/> 5-Year Savings</div>
+                    <div className="text-2xl font-black text-white flex items-center gap-1">₹{formatIndianNumber(fiveYearSavings)}</div>
                   </div>
                 </div>
               </div>
