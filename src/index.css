@@ -1,214 +1,143 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --color-forest: #1a5c40;
-  --color-meadow: #2e7d52;
-  --color-amber: #d4a017;
-  --color-parchment: #f5f1e8;
+  --color-forest: #064e3b;
+  --color-meadow: #10b981;
+  --color-amber: #f59e0b;
+  --color-parchment: #ffffff;
   --color-card: #ffffff;
-  --color-ink: #1c1c1c;
-  --color-muted: #555555;
-  --color-border: #d4d4d4;
-  /* Layered "Apple-style" elevation system — soft, multi-stop shadows */
-  --shadow-card: 0 1px 2px rgba(16, 40, 32, 0.04), 0 4px 16px rgba(16, 40, 32, 0.06);
-  --shadow-lift: 0 2px 6px rgba(16, 40, 32, 0.06), 0 12px 32px rgba(16, 40, 32, 0.10);
-  --shadow-float: 0 8px 24px rgba(16, 40, 32, 0.10), 0 24px 64px rgba(16, 40, 32, 0.14);
-  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --color-ink: #f8fafc;
+  --color-muted: #94a3b8;
+  --color-border: rgba(255, 255, 255, 0.15);
+  /* VisionOS / Premium Shadows */
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  --shadow-lift: 0 16px 48px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 body {
-  @apply m-0 bg-parchment font-sans text-ink antialiased;
-  /* Animated multi-point gradient mesh — pure CSS, GPU-friendly, ~0 KB */
-  background-color: #f5f1e8;
-  background-image:
-    radial-gradient(at 8% 6%, rgba(46, 125, 82, 0.16), transparent 38%),
-    radial-gradient(at 92% 4%, rgba(212, 160, 23, 0.13), transparent 40%),
-    radial-gradient(at 78% 96%, rgba(59, 130, 246, 0.10), transparent 42%),
-    radial-gradient(at 18% 92%, rgba(26, 92, 64, 0.10), transparent 40%);
-  background-attachment: fixed;
+  @apply m-0 font-sans antialiased text-ink;
+  font-family: 'Outfit', sans-serif;
+  background-color: transparent; /* Relying on the 3D Canvas behind it */
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
+* { box-sizing: border-box; }
+button, input, select, textarea { font: inherit; }
 
 ::selection {
-  background: rgba(46, 125, 82, 0.18);
+  background: rgba(16, 185, 129, 0.4);
+  color: white;
 }
 
-/* Refined scrollbar — subtle, native-feeling */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(26, 92, 64, 0.22);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 999px;
-  border: 3px solid transparent;
-  background-clip: content-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(26, 92, 64, 0.38);
-  background-clip: content-box;
+  background: rgba(255, 255, 255, 0.4);
 }
 
-/* ── Surfaces ──────────────────────────────────────────────────────────── */
+/* ── VisionOS Glass Surfaces ────────────────────────────────────────────── */
 .card {
-  @apply rounded-2xl border border-white/60 bg-white/85 backdrop-blur-xl;
+  @apply rounded-3xl border border-white/10 bg-slate-900/40 backdrop-blur-3xl text-white;
   box-shadow: var(--shadow-card);
-  transition: transform 0.35s var(--ease-spring), box-shadow 0.35s var(--ease-spring);
+  transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-spring), background 0.4s ease;
 }
 .card:hover {
-  transform: translateY(-3px);
+  @apply bg-slate-900/50 border-white/20;
+  transform: translateY(-4px) scale(1.01);
   box-shadow: var(--shadow-lift);
 }
 
-/* Frosted glass panel — for headers, hero sections */
 .glass {
-  @apply rounded-2xl border border-white/50 bg-white/60 backdrop-blur-2xl;
+  @apply rounded-[2rem] border border-white/10 bg-slate-900/30 backdrop-blur-[40px] text-white;
   box-shadow: var(--shadow-card);
 }
 
-/* Solid premium panel with inner highlight (looks 3D / extruded) */
 .panel-3d {
-  @apply rounded-3xl border border-white/70 bg-white;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    var(--shadow-lift);
+  @apply rounded-[2.5rem] border border-white/20 bg-slate-800/40 backdrop-blur-3xl;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), var(--shadow-lift);
 }
 
+/* ── Premium Inputs ────────────────────────────────────────────────────── */
 .input-base {
-  @apply w-full rounded-xl border border-border/70 bg-white/90 px-4 py-3 text-sm text-ink outline-none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  @apply w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none backdrop-blur-xl placeholder-white/40;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 .input-base:focus {
-  @apply border-meadow bg-white;
-  box-shadow: 0 0 0 4px rgba(46, 125, 82, 0.14);
+  @apply border-emerald-400 bg-white/10;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
 }
 
 .badge {
-  @apply inline-flex items-center rounded-badge px-3 py-1 text-xs font-semibold;
+  @apply inline-flex items-center rounded-full px-4 py-1.5 text-xs font-bold tracking-wide uppercase;
 }
 
-/* ── Buttons ───────────────────────────────────────────────────────────── */
+/* ── Glowing Buttons ───────────────────────────────────────────────────── */
 .btn-grad {
-  @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl px-5 py-3 text-sm font-semibold text-white;
-  background: linear-gradient(135deg, #2e7d52 0%, #1a5c40 100%);
-  box-shadow: 0 6px 18px rgba(26, 92, 64, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.22);
-  transition: transform 0.25s var(--ease-spring), box-shadow 0.25s var(--ease-spring);
+  @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl px-6 py-3.5 text-sm font-bold text-emerald-950;
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  transition: transform 0.3s var(--ease-spring), box-shadow 0.3s var(--ease-spring);
 }
 .btn-grad:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 26px rgba(26, 92, 64, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.8);
 }
 .btn-grad:active {
-  transform: translateY(0);
+  transform: translateY(1px) scale(0.98);
 }
 .btn-grad:disabled {
-  @apply cursor-not-allowed opacity-60;
+  @apply cursor-not-allowed opacity-50 grayscale;
   transform: none;
 }
 
 .btn-aqua {
-  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  @apply text-white;
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4);
 }
 .btn-aqua:hover {
-  box-shadow: 0 10px 26px rgba(37, 99, 235, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.30);
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.6);
 }
 
-/* Sheen sweep on hover for gradient buttons */
+/* Dynamic sheen */
 .btn-grad::after,
 .btn-aqua::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
-  transform: translateX(-130%);
-  transition: transform 0.7s var(--ease-spring);
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%);
+  transform: translateX(-150%);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-grad:hover::after,
 .btn-aqua:hover::after {
-  transform: translateX(130%);
-}
-
-.empty-illustration svg {
-  @apply h-40 w-40;
+  transform: translateX(150%);
 }
 
 /* ── Motion ────────────────────────────────────────────────────────────── */
 @keyframes floatin {
-  0% { opacity: 0; transform: translateY(14px) scale(0.99); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0% { opacity: 0; transform: translateY(20px) scale(0.95); filter: blur(10px); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 @keyframes scalein {
-  0% { opacity: 0; transform: scale(0.96); }
-  100% { opacity: 1; transform: scale(1); }
-}
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-@keyframes floaty {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-@keyframes slidein {
-  0% { opacity: 0; transform: translateX(24px) scale(0.98); }
-  100% { opacity: 1; transform: translateX(0) scale(1); }
+  0% { opacity: 0; transform: scale(0.9); filter: blur(5px); }
+  100% { opacity: 1; transform: scale(1); filter: blur(0); }
 }
 
-.animate-scalein { animation: scalein 0.4s var(--ease-spring) both; }
-.animate-floaty { animation: floaty 6s ease-in-out infinite; }
-.animate-slidein { animation: slidein 0.35s var(--ease-spring) both; }
+.animate-scalein { animation: scalein 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slidein { animation: floatin 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
-/* Stagger helper — children fade up in sequence */
-.stagger > * { animation: floatin 0.5s var(--ease-spring) both; }
-.stagger > *:nth-child(1) { animation-delay: 0.02s; }
-.stagger > *:nth-child(2) { animation-delay: 0.06s; }
-.stagger > *:nth-child(3) { animation-delay: 0.10s; }
-.stagger > *:nth-child(4) { animation-delay: 0.14s; }
-.stagger > *:nth-child(5) { animation-delay: 0.18s; }
-.stagger > *:nth-child(6) { animation-delay: 0.22s; }
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.001ms !important;
-    transition-duration: 0.001ms !important;
-  }
-}
-
-/* User-controlled motion preference (Settings → Animations) */
-html.no-motion *, html.no-motion *::before, html.no-motion *::after {
-  animation-duration: 0.001ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.001ms !important;
-}
-
-/* User-controlled compact density (Settings → Compact density) */
-html.compact .card { padding: 1rem; }
-html.compact main .overflow-auto { padding: 0.75rem; }
-html.compact .space-y-6 > * + * { margin-top: 1rem; }
-
-@media print {
-  body {
-    background: #fff;
-  }
-
-  .no-print {
-    display: none !important;
-  }
-}
+.stagger > * { animation: floatin 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger > *:nth-child(6) { animation-delay: 0.3s; }

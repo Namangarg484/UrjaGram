@@ -1,9 +1,8 @@
 function Sidebar({ activeModule, navItems, onSelect, settingsIcon: SettingsIcon, onSettings, onProfile, user }) {
   return (
-    <aside className="no-print sticky top-0 flex h-screen w-16 shrink-0 flex-col overflow-hidden text-white md:w-[230px]">
-      {/* Layered gradient backdrop for depth */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-forest via-[#15503a] to-[#0e3a29]" />
-      <div className="absolute inset-x-0 top-0 -z-10 h-48 bg-[radial-gradient(120%_80%_at_30%_0%,rgba(212,160,23,0.20),transparent_60%)]" />
+    <aside className="no-print sticky top-0 flex h-screen w-16 shrink-0 flex-col overflow-hidden text-white md:w-[230px] bg-slate-900/30 backdrop-blur-[40px] border-r border-white/10 z-40">
+      {/* Light sweep for depth */}
+      <div className="absolute inset-x-0 top-0 -z-10 h-64 bg-[radial-gradient(120%_80%_at_30%_0%,rgba(16,185,129,0.15),transparent_60%)]" />
 
       <div className="border-b border-white/10 px-3 py-5 md:px-5">
         <div className="flex items-center gap-3">
