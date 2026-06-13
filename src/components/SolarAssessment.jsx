@@ -95,6 +95,15 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
   });
 
   const predictedLoad = estimateMonthlyDemand(appliances);
+  const estimatedBill = predictedLoad * 5; // AI Forecast repo uses approx 5 INR/kWh
+  let loadCategory = { label: 'Cluster A: Low', color: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-500/20', text: 'text-blue-100' };
+  if (predictedLoad > 100 && predictedLoad <= 300) {
+    loadCategory = { label: 'Cluster B: Medium', color: 'from-emerald-500 to-teal-600', shadow: 'shadow-emerald-500/20', text: 'text-emerald-100' };
+  } else if (predictedLoad > 300 && predictedLoad <= 600) {
+    loadCategory = { label: 'Cluster C: High', color: 'from-amber-500 to-orange-600', shadow: 'shadow-amber-500/20', text: 'text-amber-100' };
+  } else if (predictedLoad > 600) {
+    loadCategory = { label: 'Cluster D: Ultra-High', color: 'from-rose-500 to-red-600', shadow: 'shadow-rose-500/20', text: 'text-rose-100' };
+  }
 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
@@ -370,14 +379,23 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
               <div className="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none"><Zap className="w-64 h-64"/></div>
               
               {/* Premium Gradient Result Card */}
-              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between bg-gradient-to-br from-emerald-500 to-teal-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-emerald-500/20">
+              <div className={`relative z-10 flex flex-col md:flex-row items-center justify-between bg-gradient-to-br ${loadCategory.color} rounded-3xl p-6 sm:p-8 text-white shadow-xl ${loadCategory.shadow} transition-colors duration-500`}>
                 <div>
-                  <h4 className="text-xs font-bold text-emerald-100 uppercase tracking-widest mb-2 flex items-center gap-2"><Sparkles className="w-4 h-4 text-yellow-300"/> AI Predicted Monthly Load</h4>
+                  <div className="flex flex-wrap items-center gap-3 mb-2">
+                    <h4 className={`text-xs font-bold ${loadCategory.text} uppercase tracking-widest flex items-center gap-2`}><Sparkles className="w-4 h-4 text-yellow-300"/> AI Predicted Monthly Load</h4>
+                    <span className="bg-white/20 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border border-white/30 shadow-sm">{loadCategory.label}</span>
+                  </div>
                   <div className="text-5xl font-black tracking-tighter">{predictedLoad} <span className="text-2xl font-bold opacity-80 tracking-normal">kWh</span></div>
                 </div>
-                <div className="text-left md:text-right mt-6 md:mt-0 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4">
-                  <div className="text-[10px] font-bold text-emerald-100 uppercase tracking-widest mb-1">Estimated CO₂ Offset</div>
-                  <div className="text-2xl font-bold text-white flex items-center gap-2 md:justify-end">~{(predictedLoad * 0.82).toFixed(1)} <span className="text-sm font-medium opacity-80">kg/mo</span></div>
+                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-6 md:mt-0">
+                  <div className="flex flex-col sm:items-end bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex-1">
+                    <div className={`text-[10px] font-bold ${loadCategory.text} uppercase tracking-widest mb-1`}>Estimated Bill</div>
+                    <div className="text-2xl font-bold text-white flex items-center gap-1">₹{formatIndianNumber(estimatedBill)} <span className="text-sm font-medium opacity-80">/mo</span></div>
+                  </div>
+                  <div className="flex flex-col sm:items-end bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex-1">
+                    <div className={`text-[10px] font-bold ${loadCategory.text} uppercase tracking-widest mb-1`}>Est. CO₂ Offset</div>
+                    <div className="text-2xl font-bold text-white flex items-center gap-1">~{(predictedLoad * 0.82).toFixed(1)} <span className="text-sm font-medium opacity-80">kg</span></div>
+                  </div>
                 </div>
               </div>
 
