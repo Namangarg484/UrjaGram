@@ -466,7 +466,28 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
               <div className="mt-6">
                 <GoiRpaSync 
                   isSyncing={true} 
-                  onSyncComplete={() => {
+                  onSyncComplete={async () => {
+                    try {
+                      await insertSolarAssessment({
+                        villageName: form.villageName || 'Unknown Village',
+                        roofAreaSqm: result ? result.roofAreaSqm : 0,
+                        usableAreaSqm: result ? result.usableAreaSqm : 0,
+                        panelCount: result ? result.panelCount : 0,
+                        systemKWp: result ? result.systemKWp : 0,
+                        annualKWh: result ? result.annualKWh : predictedLoad * 12,
+                        co2OffsetT: result ? result.co2OffsetT : 0,
+                        coveragePct: result ? result.coveragePct : 0,
+                        subsidyInr: result ? result.subsidyInr : 0,
+                        confidence: result ? result.confidence : 0,
+                        orientation: result ? result.orientation : 'Unknown',
+                        shadingPct: result ? result.shadingPct : 0,
+                        roofTypeDetected: form.roofType || null,
+                        observations: `AI Load Predicted: ${predictedLoad} kWh/mo. Bill: ₹${estimatedBill}/mo.`,
+                        assessedAt: new Date().toISOString()
+                      });
+                    } catch (err) {
+                      console.error("Supabase sync failed:", err);
+                    }
                     setIsRpaSyncing(false);
                     markStepComplete(2);
                     setStep(3);
