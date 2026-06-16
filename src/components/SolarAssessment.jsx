@@ -108,7 +108,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
   if (predictedLoad > 100 && predictedLoad <= 300) {
     loadCategory = { label: 'Cluster B: Medium', color: 'from-emerald-500 to-teal-600', shadow: 'shadow-emerald-500/20', text: 'text-emerald-100' };
   } else if (predictedLoad > 300 && predictedLoad <= 600) {
-    loadCategory = { label: 'Cluster C: High', color: 'from-amber-500 to-orange-600', shadow: 'shadow-amber-500/20', text: 'text-amber-100' };
+    loadCategory = { label: 'Cluster C: High', color: 'from-orange-500 to-red-500', shadow: 'shadow-orange-500/20', text: 'text-orange-100' };
   } else if (predictedLoad > 600) {
     loadCategory = { label: 'Cluster D: Ultra-High', color: 'from-rose-500 to-red-600', shadow: 'shadow-rose-500/20', text: 'text-rose-100' };
   }
