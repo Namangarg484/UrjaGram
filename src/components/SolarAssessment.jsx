@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, useEffect } from 'react';
-import { ImagePlus, Satellite, Sparkles, Sun, CheckCircle2, AlertTriangle, Smartphone, Camera, ChevronDown, ArrowRight, ArrowLeft, UserCircle, Store, Lock, FileText, Zap, IndianRupee, ShieldCheck, Activity, Users, Home, Monitor, Wind, Snowflake, Flame } from 'lucide-react';
+import { ImagePlus, Satellite, Sparkles, Sun, CheckCircle2, AlertTriangle, Smartphone, Camera, ChevronDown, ArrowRight, ArrowLeft, UserCircle, Store, Lock, FileText, Zap, IndianRupee, ShieldCheck, Activity, Users, Home, Monitor, Wind, Snowflake, Flame, MapPin } from 'lucide-react';
 import { stateOptions } from '../data/solarLUT';
 import { formatIndianNumber } from '../utils/indianFormat';
 import { runSolarCalculations } from '../utils/calculations';
@@ -122,6 +122,28 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
   const [result, setResult] = useState(null);
   const [docUploads, setDocUploads] = useState({});
   const [docAnalyzingId, setDocAnalyzingId] = useState(null);
+  const [gpsLocation, setGpsLocation] = useState(null);
+  const [detectingLoc, setDetectingLoc] = useState(false);
+
+  const handleDetectLocation = () => {
+    setDetectingLoc(true);
+    if (!navigator.geolocation) {
+      showToast('Geolocation is not supported by your browser.', 'error');
+      setDetectingLoc(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setGpsLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
+        showToast('Exact GPS location acquired!');
+        setDetectingLoc(false);
+      },
+      (error) => {
+        showToast('Location access denied. Using State defaults.', 'error');
+        setDetectingLoc(false);
+      }
+    );
+  };
 
   const selectedState = useMemo(() => stateOptions.find((item) => item.value === form.state) || stateOptions[0], [form.state]);
 
@@ -178,7 +200,9 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
         rajasthan: { lat: 27.02, lng: 74.21 },
         up: { lat: 26.84, lng: 80.94 }
       };
-      const coords = stateCoords[form.state] || { lat: 20.59, lng: 78.96 };
+      
+      // Use exact GPS if available, otherwise fall back to State center
+      const coords = gpsLocation || stateCoords[form.state] || { lat: 20.59, lng: 78.96 };
       
       let livePsh = null;
       try {
@@ -349,10 +373,16 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
 
             <div className="grid grid-cols-2 gap-5">
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-muted uppercase tracking-widest pl-1">State</label>
-                <select name="state" value={form.state} onChange={handleFieldChange} className="w-full rounded-2xl border border-white bg-white/60 backdrop-blur-sm px-5 py-3.5 text-sm font-semibold text-ink outline-none transition-all focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 appearance-none shadow-sm hover:shadow-md">
-                  {stateOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                </select>
+                <label className="text-[11px] font-bold text-muted uppercase tracking-widest pl-1">State / Location</label>
+                <div className="relative">
+                  <select name="state" value={form.state} onChange={handleFieldChange} className="w-full rounded-2xl border border-white bg-white/60 backdrop-blur-sm px-5 py-3.5 text-sm font-semibold text-ink outline-none transition-all focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 appearance-none shadow-sm hover:shadow-md">
+                    {stateOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  </select>
+                  <button type="button" onClick={handleDetectLocation} disabled={detectingLoc} className="absolute right-2 top-1.5 p-2 bg-emerald-100/50 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-colors" title="Detect Exact GPS Location">
+                    <MapPin className={`w-4 h-4 ${detectingLoc ? 'animate-bounce' : ''}`} />
+                  </button>
+                </div>
+                {gpsLocation && <p className="text-[10px] text-emerald-600 pl-1 font-bold animate-in fade-in slide-in-from-top-1">Exact GPS Active: {gpsLocation.lat.toFixed(4)}, {gpsLocation.lng.toFixed(4)}</p>}
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-bold text-muted uppercase tracking-widest pl-1">Roof Type</label>
