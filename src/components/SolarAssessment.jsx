@@ -160,6 +160,11 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
   };
 
   const runAssessment = async () => {
+    if (!imageFile) {
+      showToast('Upload a rooftop image first.', 'error');
+      return;
+    }
+
     try {
       setLoadingAssessment(true);
 
@@ -183,23 +188,9 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
         console.error("GEE API Error:", err);
       }
 
-      // 2. Run OpenAI Image Assessment OR Use Defaults
-      let aiResult;
-      if (imageFile) {
-        const { base64: imageBase64, mime: imageMime } = await resizeImageForVision(imageFile, 1024);
-        aiResult = await assessSolarImage({ imageMime, imageBase64 });
-      } else {
-        // Bypass AI if no image is uploaded
-        aiResult = {
-          roof_area_sqm: 45,
-          shading_pct: 10,
-          orientation: "moderate",
-          confidence: "low",
-          observations: "No image provided. Using generic 45 m² rural roof estimate.",
-          roof_type_detected: "Unknown",
-          panel_fit_notes: "Please upload an image for precise recommendations."
-        };
-      }
+      // 2. Run OpenAI Image Assessment
+      const { base64: imageBase64, mime: imageMime } = await resizeImageForVision(imageFile, 1024);
+      const aiResult = await assessSolarImage({ imageMime, imageBase64 });
       
       const computed = runSolarCalculations({
         roofArea: aiResult.roof_area_sqm,
@@ -213,7 +204,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
       });
 
       setResult({ aiResult, computed });
-      showToast(imageFile ? 'AI Rooftop assessment complete.' : 'Quick assessment complete (No AI image).');
+      showToast('AI Rooftop assessment complete.');
       markStepComplete(1);
       setTimeout(() => setStep(2), 1500); 
     } catch (error) {
