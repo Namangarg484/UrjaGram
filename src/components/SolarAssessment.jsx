@@ -167,6 +167,28 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
 
     try {
       setLoadingAssessment(true);
+
+      // 1. Fetch live Peak Sun Hours from GEE based on user state
+      const stateCoords = {
+        haryana: { lat: 29.05, lng: 76.08 },
+        delhi: { lat: 28.70, lng: 77.10 },
+        maharashtra: { lat: 19.75, lng: 75.71 },
+        gujarat: { lat: 22.25, lng: 71.19 },
+        karnataka: { lat: 15.31, lng: 75.71 },
+        rajasthan: { lat: 27.02, lng: 74.21 },
+        up: { lat: 26.84, lng: 80.94 }
+      };
+      const coords = stateCoords[form.state] || { lat: 20.59, lng: 78.96 };
+      
+      let livePsh = null;
+      try {
+        livePsh = await fetchLivePeakSunHours(coords.lat, coords.lng);
+        console.log("Live GEE PSH fetched:", livePsh);
+      } catch (err) {
+        console.error("GEE API Error:", err);
+      }
+
+      // 2. Run OpenAI Image Assessment
       const { base64: imageBase64, mime: imageMime } = await resizeImageForVision(imageFile, 1024);
       const aiResult = await assessSolarImage({ imageMime, imageBase64 });
       
@@ -178,7 +200,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
         buildingType: form.buildingType,
         monthlyConsumption: predictedLoad,
         estimatedMonthlyIncome: Number(form.estimatedMonthlyIncome),
-        overridePeakHours: null,
+        overridePeakHours: livePsh,
       });
 
       setResult({ aiResult, computed });
