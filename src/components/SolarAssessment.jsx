@@ -12,6 +12,8 @@ import {
   evaluatePmSuryaKyc,
   PM_SURYA_MOBILE_DOCS,
 } from '../utils/pmSuryaKyc';
+import GoiRpaSync from './GoiRpaSync';
+import SmartVendorMatch from './SmartVendorMatch';
 
 const roofTypeOptions = [
   { value: 'flat', label: 'Flat / RCC' },
@@ -74,6 +76,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
   const [userRole, setUserRole] = useState('household'); // 'household' or 'vendor'
   const [completedSteps, setCompletedSteps] = useState(new Set());
   const [loanTrackOn, setLoanTrackOn] = useState(false);
+  const [isRpaSyncing, setIsRpaSyncing] = useState(false);
   
   const currentSteps = userRole === 'vendor' ? VENDOR_STEPS.map(t => ({ t, n: 0 })) : VETOS_STEPS;
   
@@ -451,10 +454,26 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
 
             <div className="flex gap-4">
               <button onClick={() => setStep(1)} className="px-6 py-4.5 rounded-2xl font-bold text-muted bg-white border border-white shadow-sm hover:bg-parchment hover:border-border/50 transition-all"><ArrowLeft className="h-5 w-5"/></button>
-              <button onClick={() => { markStepComplete(2); setStep(3); }} className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-4.5 rounded-2xl font-bold flex justify-center items-center gap-2 shadow-[0_8px_20px_rgba(16,185,129,0.2)] transition-all hover:shadow-[0_12px_28px_rgba(16,185,129,0.3)] hover:-translate-y-0.5">
-                Save Load & Continue <ArrowRight className="h-5 w-5"/>
+              <button 
+                onClick={() => setIsRpaSyncing(true)} 
+                disabled={isRpaSyncing}
+                className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-4.5 rounded-2xl font-bold flex justify-center items-center gap-2 shadow-[0_8px_20px_rgba(16,185,129,0.2)] transition-all hover:shadow-[0_12px_28px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed">
+                {isRpaSyncing ? 'Syncing with GOI...' : <><Zap className="h-5 w-5"/> Start Automated GOI Push</>}
               </button>
             </div>
+
+            {isRpaSyncing && (
+              <div className="mt-6">
+                <GoiRpaSync 
+                  isSyncing={true} 
+                  onSyncComplete={() => {
+                    setIsRpaSyncing(false);
+                    markStepComplete(2);
+                    setStep(3);
+                  }} 
+                />
+              </div>
+            )}
 
             {renderVetosDetails(vetosData)}
           </div>
@@ -463,6 +482,19 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
       case 6:
       case 3:
       case 4:
+        return (
+          <div className="space-y-6">
+            <SmartVendorMatch 
+              requiredLoad={predictedLoad}
+              onVendorSelect={(vendorId) => {
+                markStepComplete(4);
+                setStep(5);
+              }}
+            />
+            {renderVetosDetails(vetosData)}
+          </div>
+        );
+
       case 5:
       case 7:
       case 8:
