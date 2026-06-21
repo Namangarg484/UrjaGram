@@ -179,6 +179,12 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
     });
   };
 
+  // Automatically request location on component mount
+  useEffect(() => {
+    handleDetectLocation();
+  }, []);
+
+
   const selectedState = useMemo(() => stateOptions.find((item) => item.value === form.state) || stateOptions[0], [form.state]);
 
   const handleFieldChange = (event) => {
