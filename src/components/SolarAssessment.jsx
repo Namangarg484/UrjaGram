@@ -132,6 +132,13 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
       setDetectingLoc(false);
       return;
     }
+
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    };
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setGpsLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
@@ -139,9 +146,17 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
         setDetectingLoc(false);
       },
       (error) => {
-        showToast('Location access denied. Using State defaults.', 'error');
+        console.error('Geolocation Error:', error);
+        if (error.code === error.PERMISSION_DENIED) {
+          showToast('Location access denied. Please allow location permissions in your browser settings.', 'error');
+        } else if (error.code === error.TIMEOUT) {
+          showToast('Location request timed out. Please try again.', 'error');
+        } else {
+          showToast('Location unavailable. Using State defaults.', 'error');
+        }
         setDetectingLoc(false);
-      }
+      },
+      options
     );
   };
 
