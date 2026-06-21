@@ -267,7 +267,21 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
         overridePeakHours: livePsh,
       });
 
-      setResult({ aiResult, computed });
+      // Dynamically seed the household load (Step 2) based on AI Vision Roof Size
+      const area = aiResult.roof_area_sqm || 45;
+      const estRooms = Math.max(1, Math.floor(area / 30));
+      setAppliances(prev => ({
+        ...prev,
+        rooms: estRooms,
+        familySize: Math.max(2, estRooms * 2),
+        fans: estRooms + 1,
+        tvs: estRooms > 3 ? 2 : 1,
+        acs: estRooms > 2 ? 1 : 0,
+        bulbs: estRooms * 2 + 2,
+        geysers: estRooms > 2 ? 1 : 0
+      }));
+
+      setResult({ aiResult, computed, livePsh });
       showToast('AI Rooftop assessment complete.');
       markStepComplete(1);
       setTimeout(() => setStep(2), 1500); 
@@ -441,7 +455,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
             {result && (
               <div className="mt-8 p-6 border-2 border-emerald-100 bg-emerald-50/50 rounded-[2rem] animate-in zoom-in-95 duration-500 shadow-sm">
                 <h4 className="font-bold text-emerald-800 mb-5 flex items-center gap-2 text-lg"><CheckCircle2 className="h-6 w-6 text-emerald-500"/> Assessment Complete</h4>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm mb-6">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 text-sm mb-6">
                   <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-50">
                     <div className="text-emerald-600/70 font-bold text-[10px] uppercase tracking-widest mb-1">System Size</div>
                     <div className="font-black text-xl text-emerald-900">{result.computed.systemKWp.toFixed(2)} <span className="text-sm opacity-70">kWp</span></div>
@@ -449,6 +463,10 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
                   <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-50">
                     <div className="text-emerald-600/70 font-bold text-[10px] uppercase tracking-widest mb-1">Annual Gen</div>
                     <div className="font-black text-xl text-emerald-900">{result.computed.annualKWh.toFixed(0)} <span className="text-sm opacity-70">kWh</span></div>
+                  </div>
+                  <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-50">
+                    <div className="text-emerald-600/70 font-bold text-[10px] uppercase tracking-widest mb-1 flex items-center gap-1"><Satellite className="w-3 h-3"/> GEE Live PSH</div>
+                    <div className="font-black text-xl text-emerald-900">{result.livePsh ? result.livePsh.toFixed(2) : result.computed.peakHours.toFixed(2)} <span className="text-sm opacity-70">hrs</span></div>
                   </div>
                   <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-50">
                     <div className="text-emerald-600/70 font-bold text-[10px] uppercase tracking-widest mb-1">Est. Subsidy</div>
