@@ -44,7 +44,7 @@ function SettingsModal({ open, onClose, settings, onChange, dbConnected, counts,
       icon={Settings}
       footer={
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted">UrjaGram VET-OS · v1.0</span>
+          <span className="text-xs text-muted">UrjaGram VET-OS · v2.0</span>
           <button onClick={onClose} className="btn-grad px-5 py-2.5 text-sm">Done</button>
         </div>
       }
