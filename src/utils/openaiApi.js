@@ -65,7 +65,7 @@ export async function assessSolarImage({ imageMime, imageBase64 }) {
     model: 'gpt-4o',
     max_tokens: 800,
     response_format: { type: 'json_object' },
-    temperature: 0.2, // slight variability so re-runs on same image aren't identical
+    temperature: 0.2,
     messages: [
       {
         role: 'system',
@@ -84,7 +84,13 @@ export async function assessSolarImage({ imageMime, imageBase64 }) {
           },
           {
             type: 'text',
-            text: `Analyse this rooftop / satellite image for solar panel installation potential in rural India.
+            text: `FIRST: Determine if this image shows a rooftop, building, or satellite/aerial view of a structure. If it does NOT show any rooftop or building, return ONLY this JSON:
+{
+  "is_rooftop": false,
+  "rejection_reason": "<1 sentence explaining what the image actually shows>"
+}
+
+If it IS a rooftop/building/satellite image, analyse it for solar panel installation potential in rural India.
 
 MEASUREMENT RULES (follow precisely):
 1. roof_area_sqm: Estimate the TOTAL visible flat or sloped rooftop area in square metres by:
@@ -102,6 +108,7 @@ MEASUREMENT RULES (follow precisely):
 
 Return ONLY this JSON object — no markdown fences, no extra text:
 {
+  "is_rooftop": true,
   "roof_area_sqm": <number>,
   "shading_pct": <number>,
   "orientation": "good" | "moderate" | "poor",
@@ -117,33 +124,26 @@ Return ONLY this JSON object — no markdown fences, no extra text:
   });
 
   const rawText = extractTextContent(data.choices?.[0]?.message?.content);
-  // Log raw response to console so it's transparent — this proves the API is live
   console.log('[UrjaGram] GPT-4o Vision raw response (call id:', data.id, '):', rawText);
 
   const cleaned = rawText.replace(/```(?:json)?/gi, '').trim();
   const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
   
   if (!jsonMatch) {
-    console.warn("[UrjaGram] Vision model refused or returned non-JSON. Falling back to default estimates. Raw text:", rawText.slice(0, 100));
-    return {
-      roof_area_sqm: 45,
-      shading_pct: 10,
-      orientation: "moderate",
-      confidence: "low",
-      observations: "OpenAI privacy filter blocked this specific image. Showing fallback generic estimates.",
-      roof_type_detected: "Unclear",
-      panel_fit_notes: "Unable to determine due to image privacy filter.",
-      _rawResponse: rawText,
-      _callId: data.id,
-      _model: data.model
-    };
+    throw new Error('Vision AI could not process this image. Please upload a clear rooftop or satellite image.');
   }
 
   const parsed = JSON.parse(jsonMatch[0]);
+
+  // Reject non-rooftop images
+  if (parsed.is_rooftop === false) {
+    throw new Error(parsed.rejection_reason || 'This does not appear to be a rooftop image. Please upload a satellite or drone photo of a building rooftop.');
+  }
+
   // Attach proof-of-life metadata from the real API response
   parsed._rawResponse = rawText;
-  parsed._callId = data.id;           // unique per request — proves this was a live call
-  parsed._model = data.model;         // exact model used (e.g. gpt-4o-2024-05-13)
+  parsed._callId = data.id;
+  parsed._model = data.model;
   parsed._promptTokens = data.usage?.prompt_tokens;
   parsed._completionTokens = data.usage?.completion_tokens;
   return parsed;
