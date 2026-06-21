@@ -70,8 +70,13 @@ export default function SmartVendorMatch({ requiredLoad, onVendorSelect }) {
               }`}
             >
               {v.verified && (
-                <div className="absolute top-0 right-0 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow-sm flex items-center gap-1">
-                  <ShieldAlert className="w-3 h-3" /> Partner
+                <div className="absolute top-0 right-0 flex flex-col items-end gap-1">
+                  <div className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow-sm flex items-center gap-1">
+                    <ShieldAlert className="w-3 h-3" /> Partner
+                  </div>
+                  <div className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-l-md shadow-sm border border-purple-400 animate-pulse">
+                    Pre-Approved Loan Available
+                  </div>
                 </div>
               )}
 

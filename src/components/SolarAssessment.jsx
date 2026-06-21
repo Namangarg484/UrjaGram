@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, useEffect } from 'react';
-import { ImagePlus, Satellite, Sparkles, Sun, CheckCircle2, AlertTriangle, Smartphone, Camera, ChevronDown, ArrowRight, ArrowLeft, UserCircle, Store, Lock, FileText, Zap, IndianRupee, ShieldCheck, Activity, Users, Home, Monitor, Wind, Snowflake, Flame, MapPin } from 'lucide-react';
+import { ImagePlus, Satellite, Sparkles, Sun, CheckCircle2, AlertTriangle, Smartphone, Camera, ChevronDown, ArrowRight, ArrowLeft, UserCircle, Store, Lock, FileText, Zap, IndianRupee, ShieldCheck, Activity, Users, Home, Monitor, Wind, Snowflake, Flame, MapPin, Landmark } from 'lucide-react';
 import { stateOptions } from '../data/solarLUT';
 import { formatIndianNumber } from '../utils/indianFormat';
 import { runSolarCalculations } from '../utils/calculations';
@@ -654,6 +654,44 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
         );
 
       case 5:
+        return (
+          <div className="space-y-6 animate-in slide-in-from-right-8 duration-700 ease-out">
+            <div className="text-center py-12 bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[2.5rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none"><Landmark className="w-64 h-64"/></div>
+              
+              <div className="relative z-10">
+                <div className="mx-auto h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center mb-6 shadow-lg shadow-purple-500/20">
+                  <Landmark className="h-10 w-10 text-white" />
+                </div>
+                
+                <h3 className="text-3xl font-black tracking-tight text-ink mb-2">1-Click Financing Gateway</h3>
+                <p className="text-muted text-base max-w-md mx-auto leading-relaxed mb-8 font-medium">NBFC Partner: <span className="text-purple-700 font-bold">Ecofy</span></p>
+
+                <div className="bg-white rounded-2xl p-6 border border-purple-100 shadow-sm text-left max-w-lg mx-auto mb-8">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-sm font-bold text-muted uppercase tracking-widest">Net Payable</span>
+                    <span className="text-xl font-black text-ink">₹{formatIndianNumber(Math.round((result?.computed?.systemKWp || 3) * 50000 - (result?.computed?.subsidy || 78000)))}</span>
+                  </div>
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-sm font-bold text-muted uppercase tracking-widest">Pre-Approved Limit</span>
+                    <span className="text-xl font-black text-emerald-600">₹{formatIndianNumber(250000)}</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                    <span className="text-sm font-bold text-muted uppercase tracking-widest">Estimated EMI</span>
+                    <span className="text-2xl font-black text-purple-700">₹{formatIndianNumber(Math.round(((result?.computed?.systemKWp || 3) * 50000 - (result?.computed?.subsidy || 78000)) * 0.02))} <span className="text-sm">/mo</span></span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+                  <button onClick={() => setStep(4)} className="flex-1 bg-white border border-white text-ink font-bold py-4.5 rounded-2xl shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"><ArrowLeft className="inline w-4 h-4 mr-1"/> Back</button>
+                  <button onClick={() => { showToast('Loan Approved! Tranche 1 released to Vendor.'); markStepComplete(5); setTimeout(() => setStep(6), 1500); }} className="flex-[2] bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4.5 rounded-2xl shadow-[0_8px_20px_rgba(147,51,234,0.25)] hover:shadow-[0_12px_28px_rgba(147,51,234,0.35)] transition-all hover:-translate-y-0.5">Approve & Disburse</button>
+                </div>
+              </div>
+            </div>
+            {renderVetosDetails(vetosData)}
+          </div>
+        );
+
       case 7:
       case 8:
       case 9:
