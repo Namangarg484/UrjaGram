@@ -127,6 +127,13 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
 
   const handleDetectLocation = () => {
     setDetectingLoc(true);
+    
+    if (window.isSecureContext === false) {
+      showToast('Location tracking requires a secure connection (HTTPS or localhost). Testing on an IP address (HTTP) blocks location access.', 'error');
+      setDetectingLoc(false);
+      return;
+    }
+
     if (!navigator.geolocation) {
       showToast('Geolocation is not supported by your browser.', 'error');
       setDetectingLoc(false);
