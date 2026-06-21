@@ -140,31 +140,43 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
       return;
     }
 
-    const options = {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0
+    const handleSuccess = (position) => {
+      setGpsLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
+      showToast('Location acquired successfully!');
+      setDetectingLoc(false);
     };
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setGpsLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
-        showToast('Exact GPS location acquired!');
+    const handleErrorFallback = (error) => {
+      console.error('Geolocation Error:', error);
+      if (error.code === error.PERMISSION_DENIED) {
+        showToast('Access denied. Please check your browser AND operating system location settings.', 'error');
+      } else {
+        showToast('Location unavailable. Using State defaults.', 'error');
+      }
+      setDetectingLoc(false);
+    };
+
+    const handleError = (error) => {
+      if (error.code === error.PERMISSION_DENIED) {
+        showToast('Location access denied. Please allow location permissions in your browser.', 'error');
         setDetectingLoc(false);
-      },
-      (error) => {
-        console.error('Geolocation Error:', error);
-        if (error.code === error.PERMISSION_DENIED) {
-          showToast('Location access denied. Please allow location permissions in your browser settings.', 'error');
-        } else if (error.code === error.TIMEOUT) {
-          showToast('Location request timed out. Please try again.', 'error');
-        } else {
-          showToast('Location unavailable. Using State defaults.', 'error');
-        }
-        setDetectingLoc(false);
-      },
-      options
-    );
+      } else {
+        console.warn('High Accuracy failed, falling back to standard accuracy...', error);
+        // Fallback for laptops without GPS chips
+        navigator.geolocation.getCurrentPosition(handleSuccess, handleErrorFallback, { 
+          enableHighAccuracy: false, 
+          timeout: 10000, 
+          maximumAge: 60000 
+        });
+      }
+    };
+
+    // Try High Accuracy first (phones)
+    navigator.geolocation.getCurrentPosition(handleSuccess, handleError, {
+      enableHighAccuracy: true,
+      timeout: 6000,
+      maximumAge: 0
+    });
   };
 
   const selectedState = useMemo(() => stateOptions.find((item) => item.value === form.state) || stateOptions[0], [form.state]);
