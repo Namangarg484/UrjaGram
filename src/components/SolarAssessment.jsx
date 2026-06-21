@@ -7,6 +7,7 @@ import { assessSolarImage } from '../utils/openaiApi';
 import { resizeImageForVision } from '../utils/imageUtils';
 import { insertSolarAssessment } from '../utils/supabaseClient';
 import { fetchLivePeakSunHours } from '../utils/geeApi';
+import { useLanguage } from '../contexts/LanguageContext';
 import { analyzeDocumentImage } from '../utils/documentQuality';
 import {
   evaluatePmSuryaKyc,
@@ -72,6 +73,7 @@ const estimateMonthlyDemand = (appliances) => {
 };
 
 export default function SolarAssessment({ villages, saveAssessment, showToast, currentUser }) {
+  const { t } = useLanguage();
   const [step, setStep] = useState(1);
   const [userRole, setUserRole] = useState('household'); // 'household' or 'vendor'
   const [completedSteps, setCompletedSteps] = useState(new Set());
@@ -399,8 +401,8 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
         return (
           <div className="space-y-6 animate-in slide-in-from-bottom-8 duration-700 ease-out">
             <div>
-              <h3 className="text-3xl font-bold tracking-tight text-ink">{userRole === 'vendor' ? 'Client Site AI Assessment' : 'Consumer Registration'}</h3>
-              <p className="text-base text-muted mt-1.5">Upload a clear satellite or drone image of the {userRole === 'vendor' ? "client's" : "your"} rooftop to begin the PM Surya Ghar process.</p>
+              <h3 className="text-3xl font-bold tracking-tight text-ink">{userRole === 'vendor' ? t('sa_title_vendor') : t('sa_title_user')}</h3>
+              <p className="text-base text-muted mt-1.5">{t('sa_subtitle')}</p>
               {vetosData && <div className="inline-flex items-center gap-2 text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full mt-3 border border-indigo-100 shadow-sm"><FileText className="w-3.5 h-3.5"/> Portal: {vetosData.portal}</div>}
             </div>
             
@@ -411,14 +413,14 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
               {imagePreview ? (
                 <div className="w-full space-y-4 animate-in zoom-in-95 duration-500">
                   <img src={imagePreview} alt="Preview" className="h-[280px] w-full rounded-[1.5rem] object-cover shadow-md" />
-                  <div className="text-sm font-bold text-emerald-600 group-hover:text-emerald-700 transition-colors">Tap to change image</div>
+                  <div className="text-sm font-bold text-emerald-600 group-hover:text-emerald-700 transition-colors">{t('sa_tap_change')}</div>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center text-muted transition-transform duration-500 group-hover:scale-105">
                   <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 shadow-sm mb-5">
                     <Satellite className="h-10 w-10 text-emerald-500" />
                   </div>
-                  <p className="font-bold text-ink text-xl tracking-tight">Drop image here or browse</p>
+                  <p className="font-bold text-ink text-xl tracking-tight">{t('sa_upload_img')}</p>
                   <p className="text-sm mt-1.5 font-medium opacity-70">Supports high-res PNG, JPG, WEBP</p>
                 </div>
               )}
@@ -427,7 +429,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
 
             <div className="grid grid-cols-2 gap-5">
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-muted uppercase tracking-widest pl-1">State / Location</label>
+                <label className="text-[11px] font-bold text-muted uppercase tracking-widest pl-1">{t('sa_state_label')} / Location</label>
                 <div className="relative">
                   <select name="state" value={form.state} onChange={handleFieldChange} className="w-full rounded-2xl border border-white bg-white/60 backdrop-blur-sm px-5 py-3.5 text-sm font-semibold text-ink outline-none transition-all focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 appearance-none shadow-sm hover:shadow-md">
                     {stateOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
@@ -436,10 +438,10 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
                     <MapPin className={`w-4 h-4 ${detectingLoc ? 'animate-bounce' : ''}`} />
                   </button>
                 </div>
-                {gpsLocation && <p className="text-[10px] text-emerald-600 pl-1 font-bold animate-in fade-in slide-in-from-top-1">Exact GPS Active: {Math.abs(gpsLocation.lat).toFixed(8)}° {gpsLocation.lat >= 0 ? 'N' : 'S'}, {Math.abs(gpsLocation.lng).toFixed(8)}° {gpsLocation.lng >= 0 ? 'E' : 'W'}</p>}
+                {gpsLocation && <p className="text-[10px] text-emerald-600 pl-1 font-bold animate-in fade-in slide-in-from-top-1">{t('sa_exact_gps')} {Math.abs(gpsLocation.lat).toFixed(8)}° {gpsLocation.lat >= 0 ? 'N' : 'S'}, {Math.abs(gpsLocation.lng).toFixed(8)}° {gpsLocation.lng >= 0 ? 'E' : 'W'}</p>}
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-muted uppercase tracking-widest pl-1">Roof Type</label>
+                <label className="text-[11px] font-bold text-muted uppercase tracking-widest pl-1">{t('sa_roof_type')}</label>
                 <select name="roofType" value={form.roofType} onChange={handleFieldChange} className="w-full rounded-2xl border border-white bg-white/60 backdrop-blur-sm px-5 py-3.5 text-sm font-semibold text-ink outline-none transition-all focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 appearance-none shadow-sm hover:shadow-md">
                   {roofTypeOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
@@ -448,28 +450,28 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
 
             <button onClick={runAssessment} disabled={loadingAssessment} className="group relative w-full overflow-hidden rounded-[1.5rem] bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4.5 text-white font-bold shadow-[0_8px_20px_rgba(16,185,129,0.25)] transition-all hover:shadow-[0_12px_28px_rgba(16,185,129,0.35)] hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none">
               <div className="flex items-center justify-center gap-2.5 relative z-10 py-1">
-                {loadingAssessment ? 'Analysing with GPT-4o Vision...' : <><Sparkles className="h-5 w-5"/> Analyze Generation Potential</>}
+                {loadingAssessment ? t('sa_detect_loc') : <><Sparkles className="h-5 w-5"/> {t('sa_run_ai')}</>}
               </div>
             </button>
             
             {result && (
               <div className="mt-8 p-6 border-2 border-emerald-100 bg-emerald-50/50 rounded-[2rem] animate-in zoom-in-95 duration-500 shadow-sm">
-                <h4 className="font-bold text-emerald-800 mb-5 flex items-center gap-2 text-lg"><CheckCircle2 className="h-6 w-6 text-emerald-500"/> Assessment Complete</h4>
+                <h4 className="font-bold text-emerald-800 mb-5 flex items-center gap-2 text-lg"><CheckCircle2 className="h-6 w-6 text-emerald-500"/> {t('sa_assessment_complete')}</h4>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 text-sm mb-6">
                   <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-50">
-                    <div className="text-emerald-600/70 font-bold text-[10px] uppercase tracking-widest mb-1">System Size</div>
+                    <div className="text-emerald-600/70 font-bold text-[10px] uppercase tracking-widest mb-1">{t('sa_system_size')}</div>
                     <div className="font-black text-xl text-emerald-900">{result.computed.systemKWp.toFixed(2)} <span className="text-sm opacity-70">kWp</span></div>
                   </div>
                   <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-50">
-                    <div className="text-emerald-600/70 font-bold text-[10px] uppercase tracking-widest mb-1">Annual Gen</div>
+                    <div className="text-emerald-600/70 font-bold text-[10px] uppercase tracking-widest mb-1">{t('sa_annual_gen')}</div>
                     <div className="font-black text-xl text-emerald-900">{result.computed.annualKWh.toFixed(0)} <span className="text-sm opacity-70">kWh</span></div>
                   </div>
                   <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-50">
-                    <div className="text-emerald-600/70 font-bold text-[10px] uppercase tracking-widest mb-1 flex items-center gap-1"><Satellite className="w-3 h-3"/> GEE Live PSH</div>
+                    <div className="text-emerald-600/70 font-bold text-[10px] uppercase tracking-widest mb-1 flex items-center gap-1"><Satellite className="w-3 h-3"/> {t('sa_gee_live')}</div>
                     <div className="font-black text-xl text-emerald-900">{result.livePsh ? result.livePsh.toFixed(2) : result.computed.peakHours.toFixed(2)} <span className="text-sm opacity-70">hrs</span></div>
                   </div>
                   <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-50">
-                    <div className="text-emerald-600/70 font-bold text-[10px] uppercase tracking-widest mb-1">Est. Subsidy</div>
+                    <div className="text-emerald-600/70 font-bold text-[10px] uppercase tracking-widest mb-1">{t('sa_est_subsidy')}</div>
                     <div className="font-black text-xl text-emerald-600">₹{formatIndianNumber(Math.round(result.computed.subsidy))}</div>
                   </div>
                   <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-50">
@@ -491,8 +493,8 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
         return (
           <div className="space-y-6 animate-in slide-in-from-right-8 duration-700 ease-out">
             <div>
-              <h3 className="text-3xl font-bold tracking-tight text-ink">{userRole === 'vendor' ? 'Technical Proposal & Load' : 'Application Submission'}</h3>
-              <p className="text-base text-muted mt-1.5">Provide household appliance details to accurately forecast monthly electricity demand using AI.</p>
+              <h3 className="text-3xl font-bold tracking-tight text-ink">{t('sa_dashboard_title')}</h3>
+              <p className="text-base text-muted mt-1.5">{t('sa_dashboard_subtitle')}</p>
               {vetosData && <div className="inline-flex items-center gap-2 text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full mt-3 border border-indigo-100 shadow-sm"><FileText className="w-3.5 h-3.5"/> Portal: {vetosData.portal}</div>}
             </div>
             
@@ -503,22 +505,22 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
               <div className={`relative z-10 flex flex-col md:flex-row items-center justify-between bg-gradient-to-br ${loadCategory.color} rounded-3xl p-6 sm:p-8 text-white shadow-xl ${loadCategory.shadow} transition-colors duration-500`}>
                 <div>
                   <div className="flex flex-wrap items-center gap-3 mb-2">
-                    <h4 className={`text-xs font-bold ${loadCategory.text} uppercase tracking-widest flex items-center gap-2`}><Sparkles className="w-4 h-4 text-yellow-300"/> AI Predicted Monthly Load</h4>
+                    <h4 className={`text-xs font-bold ${loadCategory.text} uppercase tracking-widest flex items-center gap-2`}><Sparkles className="w-4 h-4 text-yellow-300"/> {t('sa_monthly_load')}</h4>
                     <span className="bg-white/20 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border border-white/30 shadow-sm">{loadCategory.label}</span>
                   </div>
                   <div className="text-5xl font-black tracking-tighter">{predictedLoad} <span className="text-2xl font-bold opacity-80 tracking-normal">kWh</span></div>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-6 md:mt-0">
                   <div className="flex flex-col sm:items-end bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex-1">
-                    <div className={`text-[10px] font-bold ${loadCategory.text} uppercase tracking-widest mb-1`}>Estimated Bill</div>
+                    <div className={`text-[10px] font-bold ${loadCategory.text} uppercase tracking-widest mb-1`}>{t('sa_est_bill')}</div>
                     <div className="text-2xl font-bold text-white flex items-center gap-1">₹{formatIndianNumber(estimatedBill)} <span className="text-sm font-medium opacity-80">/mo</span></div>
                   </div>
                   <div className="flex flex-col sm:items-end bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex-1">
-                    <div className={`text-[10px] font-bold ${loadCategory.text} uppercase tracking-widest mb-1`}>Est. CO₂ Offset</div>
+                    <div className={`text-[10px] font-bold ${loadCategory.text} uppercase tracking-widest mb-1`}>{t('sa_co2_offset')}</div>
                     <div className="text-2xl font-bold text-white flex items-center gap-1">~{(predictedLoad * 0.82).toFixed(1)} <span className="text-sm font-medium opacity-80">kg</span></div>
                   </div>
                   <div className="flex flex-col sm:items-end bg-white/20 backdrop-blur-md border border-white/40 rounded-2xl p-4 flex-1 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-                    <div className={`text-[10px] font-bold text-white uppercase tracking-widest mb-1 flex items-center gap-1`}><Zap className="w-3 h-3 text-yellow-300"/> 5-Year Savings</div>
+                    <div className={`text-[10px] font-bold text-white uppercase tracking-widest mb-1 flex items-center gap-1`}><Zap className="w-3 h-3 text-yellow-300"/> {t('sa_5yr_savings')}</div>
                     <div className="text-2xl font-black text-white flex items-center gap-1">₹{formatIndianNumber(fiveYearSavings)}</div>
                   </div>
                 </div>
@@ -527,16 +529,16 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
               {/* Crisp Inputs Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-5 gap-y-6 relative z-10">
                 {[
-                  { label: "Family Size", name: "familySize", max: 15, icon: Users },
-                  { label: "Rooms", name: "rooms", max: 10, icon: Home },
-                  { label: "Fans", name: "fans", max: 10, icon: Wind },
-                  { label: "TVs", name: "tvs", max: 5, icon: Monitor },
-                  { label: "ACs", name: "acs", max: 5, icon: Snowflake },
-                  { label: "Coolers", name: "coolers", max: 5, icon: Wind },
-                  { label: "Geysers", name: "geysers", max: 4, icon: Flame },
-                  { label: "Heaters", name: "heaters", max: 4, icon: Flame },
-                  { label: "Bulbs", name: "bulbs", max: 30, icon: Sun },
-                  { label: "Supply Hrs", name: "supplyHours", max: 24, icon: Zap }
+                  { label: t('app_family'), name: "familySize", max: 15, icon: Users },
+                  { label: t('app_rooms'), name: "rooms", max: 10, icon: Home },
+                  { label: t('app_fans'), name: "fans", max: 10, icon: Wind },
+                  { label: t('app_tvs'), name: "tvs", max: 5, icon: Monitor },
+                  { label: t('app_acs'), name: "acs", max: 5, icon: Snowflake },
+                  { label: t('app_coolers'), name: "coolers", max: 5, icon: Wind },
+                  { label: t('app_geysers'), name: "geysers", max: 4, icon: Flame },
+                  { label: t('app_heaters'), name: "heaters", max: 4, icon: Flame },
+                  { label: t('app_bulbs'), name: "bulbs", max: 30, icon: Sun },
+                  { label: t('app_supply'), name: "supplyHours", max: 24, icon: Zap }
                 ].map((input) => (
                   <div key={input.name} className="space-y-2 group">
                     <label className="text-[10px] font-bold text-muted uppercase tracking-widest flex items-center gap-1.5"><input.icon className="w-3.5 h-3.5 opacity-60"/> {input.label}</label>
@@ -548,11 +550,11 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
               {/* Checkboxes */}
               <div className="flex flex-wrap gap-3 pt-6 border-t border-border/40 relative z-10">
                 {[
-                  { label: "Refrigerator", name: "fridge" },
-                  { label: "Mixer/Grinder", name: "mixer" },
-                  { label: "Washing Machine", name: "washingMachine" },
-                  { label: "Water Pump", name: "pump" },
-                  { label: "Plan for Future EV/AC Upgrade (+30%)", name: "futureGrowth" }
+                  { label: t('app_fridge'), name: "fridge" },
+                  { label: t('app_mixer'), name: "mixer" },
+                  { label: t('app_washing'), name: "washingMachine" },
+                  { label: t('app_pump'), name: "pump" },
+                  { label: t('app_future'), name: "futureGrowth" }
                 ].map((chk) => (
                   <label key={chk.name} className={`flex items-center gap-2.5 text-sm font-bold cursor-pointer px-4 py-2.5 rounded-xl border transition-all ${appliances[chk.name] ? 'bg-emerald-50 border-emerald-200 text-emerald-800 shadow-sm' : 'bg-white/60 border-white text-muted hover:border-emerald-200 hover:text-ink shadow-sm'}`}>
                     <input type="checkbox" name={chk.name} checked={appliances[chk.name]} onChange={handleApplianceChange} className="w-4 h-4 text-emerald-500 rounded border-gray-300 focus:ring-emerald-500 accent-emerald-500" />
@@ -560,6 +562,31 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
                   </label>
                 ))}
               </div>
+
+              {/* Finance Box */}
+              {result && (
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-3xl p-6 relative z-10 shadow-sm mt-6">
+                  <h4 className="text-sm font-bold text-emerald-800 mb-4 flex items-center gap-2"><IndianRupee className="w-4 h-4"/> Financial Summary</h4>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-50">
+                      <div className="text-xs font-bold text-muted mb-1">{t('fin_gross_cost')}</div>
+                      <div className="font-black text-lg text-ink">₹{formatIndianNumber(Math.round(result.computed.systemKWp * 50000))}</div>
+                    </div>
+                    <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-50">
+                      <div className="text-xs font-bold text-muted mb-1">{t('fin_net_cost')}</div>
+                      <div className="font-black text-lg text-emerald-700">₹{formatIndianNumber(Math.round((result.computed.systemKWp * 50000) - result.computed.subsidy))}</div>
+                    </div>
+                    <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-50">
+                      <div className="text-xs font-bold text-muted mb-1">{t('fin_loan_emi')}</div>
+                      <div className="font-black text-lg text-purple-700">₹{formatIndianNumber(Math.round(((result.computed.systemKWp * 50000) - result.computed.subsidy) * 0.02))} <span className="text-xs font-medium text-muted">/mo</span></div>
+                    </div>
+                    <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-50">
+                      <div className="text-xs font-bold text-muted mb-1">{t('fin_affordable')}</div>
+                      <div className="font-black text-lg text-teal-700 flex items-center gap-1"><CheckCircle2 className="w-4 h-4"/> YES</div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-4">
@@ -568,7 +595,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
                 onClick={() => setIsRpaSyncing(true)} 
                 disabled={isRpaSyncing}
                 className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-4.5 rounded-2xl font-bold flex justify-center items-center gap-2 shadow-[0_8px_20px_rgba(16,185,129,0.2)] transition-all hover:shadow-[0_12px_28px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed">
-                {isRpaSyncing ? 'Syncing with GOI...' : <><Zap className="h-5 w-5"/> Start Automated GOI Push</>}
+                {isRpaSyncing ? 'Syncing with GOI...' : <><Zap className="h-5 w-5"/> {t('sa_start_goi')}</>}
               </button>
             </div>
 

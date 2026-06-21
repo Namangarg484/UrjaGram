@@ -22,11 +22,13 @@ import {
   subscribeToAssessments,
 } from './utils/supabaseClient';
 import { initialAssessments, initialMrvRecords, initialVillages } from './data/sampleData';
+import { useLanguage } from './contexts/LanguageContext';
 
-const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard',         icon: LayoutDashboard },
-  { id: 'suryaghar', label: 'PM Surya Ghar',     icon: Sun },
-  { id: 'cooking',   label: 'Clean Cooking',     icon: Flame },
+// We move NAV_ITEMS inside or just translate them dynamically
+const getNavItems = (t) => [
+  { id: 'dashboard', label: t('nav_dashboard'),         icon: LayoutDashboard },
+  { id: 'suryaghar', label: t('nav_solar'),     icon: Sun },
+  { id: 'cooking',   label: t('nav_cooking'),     icon: Flame },
 ];
 
 const STATIC_USER = { name: 'Field User', role: 'Field Officer', initials: 'FU', email: '' };
@@ -49,6 +51,8 @@ function loadStored(key, fallback) {
 }
 
 function App() {
+  const { language, toggleLanguage, t } = useLanguage();
+  const NAV_ITEMS = getNavItems(t);
   const [activeModule, setActiveModule] = useState('suryaghar');
   const [villages, setVillages] = useState(initialVillages);
   const [assessments, setAssessments] = useState(initialAssessments);
@@ -142,6 +146,7 @@ function App() {
             onSettings={() => setSettingsOpen(true)}
             onProfile={() => setProfileOpen(true)}
             user={user}
+            t={t}
           />
 
           <main className="min-w-0 flex-1 overflow-hidden z-10">
@@ -151,9 +156,16 @@ function App() {
                   {NAV_ITEMS.find((n) => n.id === activeModule)?.label ?? 'Dashboard'}
                 </span>
                 <span className="hidden text-slate-400 sm:inline">/</span>
-                <span className="hidden text-xs text-emerald-700 font-bold tracking-wide uppercase sm:inline">UrjaGram VET-OS</span>
+                <span className="hidden text-xs text-emerald-700 font-bold tracking-wide uppercase sm:inline">{t('nav_vetos')}</span>
               </div>
               <div className="flex items-center gap-2">
+                <button
+                  onClick={toggleLanguage}
+                  title="Toggle Language"
+                  className="hidden h-9 items-center justify-center rounded-full border border-white/60 bg-white/40 px-3 text-sm font-bold text-emerald-800 backdrop-blur-md transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-900 sm:flex pointer-events-auto"
+                >
+                  {language === 'en' ? 'A / अ' : 'अ / A'}
+                </button>
                 <span
                   title={dbConnected ? 'Supabase connected' : 'Using sample data'}
                   className={`hidden items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold sm:inline-flex ${
