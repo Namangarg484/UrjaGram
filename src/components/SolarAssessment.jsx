@@ -422,7 +422,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
                     <MapPin className={`w-4 h-4 ${detectingLoc ? 'animate-bounce' : ''}`} />
                   </button>
                 </div>
-                {gpsLocation && <p className="text-[10px] text-emerald-600 pl-1 font-bold animate-in fade-in slide-in-from-top-1">Exact GPS Active: {gpsLocation.lat.toFixed(4)}, {gpsLocation.lng.toFixed(4)}</p>}
+                {gpsLocation && <p className="text-[10px] text-emerald-600 pl-1 font-bold animate-in fade-in slide-in-from-top-1">Exact GPS Active: {Math.abs(gpsLocation.lat).toFixed(8)}° {gpsLocation.lat >= 0 ? 'N' : 'S'}, {Math.abs(gpsLocation.lng).toFixed(8)}° {gpsLocation.lng >= 0 ? 'E' : 'W'}</p>}
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-bold text-muted uppercase tracking-widest pl-1">Roof Type</label>
