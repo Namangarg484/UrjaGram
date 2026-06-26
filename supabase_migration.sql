@@ -69,6 +69,20 @@ create table if not exists mrv_records (
   unique (village_id, month, year)
 );
 
+create table if not exists urjasakhi_data (
+  id                 bigserial primary key,
+  household_head     text not null,
+  contact_number     text,
+  address            text,
+  family_size        integer,
+  electricity_source text check (electricity_source in ('grid', 'offgrid', 'none')),
+  monthly_bill       numeric(10, 2),
+  roof_type          text check (roof_type in ('concrete', 'tin', 'kacha')),
+  status             text not null default 'pending_push'
+                     check (status in ('pending_push', 'pushed')),
+  created_at         timestamptz not null default now()
+);
+
 -- ─── ROW LEVEL SECURITY ───────────────────────────────────────────────────────
 -- App uses anon key directly (no auth). Policies allow full access via anon key.
 
@@ -76,22 +90,26 @@ alter table villages          enable row level security;
 alter table solar_assessments enable row level security;
 alter table viip_documents    enable row level security;
 alter table mrv_records       enable row level security;
+alter table urjasakhi_data    enable row level security;
 
 -- Drop existing policies first (idempotent re-run support)
 drop policy if exists "auth_all"   on villages;
 drop policy if exists "auth_all"   on solar_assessments;
 drop policy if exists "auth_all"   on viip_documents;
 drop policy if exists "auth_all"   on mrv_records;
+drop policy if exists "auth_all"   on urjasakhi_data;
 drop policy if exists "public_all" on villages;
 drop policy if exists "public_all" on solar_assessments;
 drop policy if exists "public_all" on viip_documents;
 drop policy if exists "public_all" on mrv_records;
+drop policy if exists "public_all" on urjasakhi_data;
 
 -- Allow full read + write via the anon key (no login required)
 create policy "public_all" on villages          for all using (true) with check (true);
 create policy "public_all" on solar_assessments for all using (true) with check (true);
 create policy "public_all" on viip_documents    for all using (true) with check (true);
 create policy "public_all" on mrv_records       for all using (true) with check (true);
+create policy "public_all" on urjasakhi_data    for all using (true) with check (true);
 
 -- ─── SEED VILLAGES ────────────────────────────────────────────────────────────
 

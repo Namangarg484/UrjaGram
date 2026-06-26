@@ -1,4 +1,4 @@
-import { Bell, Flame, LayoutDashboard, Settings, Sun, Wifi, WifiOff } from 'lucide-react';
+import { Bell, Flame, LayoutDashboard, Settings, Sun, Wifi, WifiOff, ClipboardList } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -9,6 +9,7 @@ import MRVDashboard from './components/MRVDashboard';
 import SchemeFinder from './components/SchemeFinder';
 import WaterSolar from './components/WaterSolar';
 import CleanCooking from './components/CleanCooking';
+import UrjaSakhi from './components/UrjaSakhi';
 import Toast from './components/Toast';
 import SettingsModal from './components/SettingsModal';
 import ProfileModal from './components/ProfileModal';
@@ -29,6 +30,7 @@ const getNavItems = (t) => [
   { id: 'dashboard', label: t('nav_dashboard'),         icon: LayoutDashboard },
   { id: 'suryaghar', label: t('nav_solar'),     icon: Sun },
   { id: 'cooking',   label: t('nav_cooking'),     icon: Flame },
+  { id: 'urjasakhi', label: t('nav_urjasakhi'),   icon: ClipboardList },
 ];
 
 const STATIC_USER = { name: 'Field User', role: 'Field Officer', initials: 'FU', email: '' };
@@ -124,6 +126,7 @@ function App() {
       case 'dashboard': return <Dashboard villages={villages} assessments={assessments} mrvRecords={mrvRecords} />;
       case 'suryaghar': return <SolarAssessment {...sharedModuleProps} />;
       case 'cooking':   return <CleanCooking showToast={showToast} />;
+      case 'urjasakhi': return <UrjaSakhi showToast={showToast} />;
       default:          return <Dashboard villages={villages} assessments={assessments} mrvRecords={mrvRecords} />;
     }
   };

@@ -7,6 +7,7 @@ export const translations = {
     nav_solar: "Solar Assessment",
     nav_finance: "Finance & Subsidies",
     nav_cooking: "Clean Cooking",
+    nav_urjasakhi: "Urja Sakhi",
     nav_vetos: "VET-OS Portal",
     
     // Steps
@@ -66,7 +67,25 @@ export const translations = {
     fin_cibil_warning: "High EMI / CIBIL Risk",
     fin_channel: "Recommended Bank Channel",
     
-    sa_start_goi: "Start Automated GOI Push"
+    sa_start_goi: "Start Automated GOI Push",
+    
+    // Urja Sakhi
+    us_title: "Urja Sakhi Data Collection",
+    us_subtitle: "Door-to-door household information collection",
+    us_form_head: "Household Head Name",
+    us_form_contact: "Contact Number",
+    us_form_address: "Address / Village",
+    us_form_family_size: "Family Size",
+    us_form_electricity: "Electricity Source",
+    us_form_electricity_grid: "Grid Connection",
+    us_form_electricity_offgrid: "Off-Grid / Solar",
+    us_form_electricity_none: "No Connection",
+    us_form_bill: "Average Monthly Bill (₹)",
+    us_form_roof: "Roof Type",
+    us_form_roof_concrete: "Concrete / RCC",
+    us_form_roof_tin: "Tin / Asbestos",
+    us_form_roof_kacha: "Kacha / Thatched",
+    us_submit: "Save & Push to DISCOM/MNRE"
   },
   hi: {
     // Global
@@ -76,6 +95,7 @@ export const translations = {
     nav_solar: "सौर मूल्यांकन",
     nav_finance: "वित्त और सब्सिडी",
     nav_cooking: "स्वच्छ खाना बनाना",
+    nav_urjasakhi: "ऊर्जा सखी",
     nav_vetos: "VET-OS पोर्टल",
     
     // Steps
@@ -135,6 +155,24 @@ export const translations = {
     fin_cibil_warning: "उच्च ईएमआई / सिबिल (CIBIL) जोखिम",
     fin_channel: "अनुशंसित बैंक चैनल",
     
-    sa_start_goi: "स्वचालित GOI (सरकारी) पुश शुरू करें"
+    sa_start_goi: "स्वचालित GOI (सरकारी) पुश शुरू करें",
+
+    // Urja Sakhi
+    us_title: "ऊर्जा सखी डेटा संग्रह",
+    us_subtitle: "घर-घर जाकर पारिवारिक जानकारी का संग्रह",
+    us_form_head: "परिवार के मुखिया का नाम",
+    us_form_contact: "संपर्क नंबर",
+    us_form_address: "पता / गाँव",
+    us_form_family_size: "परिवार का आकार",
+    us_form_electricity: "बिजली का स्रोत",
+    us_form_electricity_grid: "ग्रिड कनेक्शन",
+    us_form_electricity_offgrid: "ऑफ-ग्रिड / सोलर",
+    us_form_electricity_none: "कोई कनेक्शन नहीं",
+    us_form_bill: "औसत मासिक बिल (₹)",
+    us_form_roof: "छत का प्रकार",
+    us_form_roof_concrete: "पक्की / आरसीसी (Concrete)",
+    us_form_roof_tin: "टिन / एस्बेस्टस (Tin)",
+    us_form_roof_kacha: "कच्ची (Kacha)",
+    us_submit: "सहेजें और DISCOM/MNRE को भेजें"
   }
 };
