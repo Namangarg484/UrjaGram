@@ -19,13 +19,16 @@ export default function UrjaSakhi({ showToast }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pushSuccess, setPushSuccess] = useState(false);
 
-  const handleFileUpload = (type) => {
-    setUploadingDoc(type);
-    setTimeout(() => {
-      setDocuments(prev => ({ ...prev, [type]: `mock_${type}_${Date.now()}.pdf` }));
-      setUploadingDoc(null);
-      showToast(`Document uploaded successfully`, 'success');
-    }, 1200);
+  const handleFileChange = (e, type) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setUploadingDoc(type);
+      setTimeout(() => {
+        setDocuments(prev => ({ ...prev, [type]: file.name }));
+        setUploadingDoc(null);
+        showToast(`Document uploaded successfully`, 'success');
+      }, 1200);
+    }
   };
 
   const handleChange = (e) => {
@@ -263,14 +266,16 @@ export default function UrjaSakhi({ showToast }) {
                       Uploading...
                     </div>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleFileUpload(doc.id)}
-                      className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-50 hover:text-purple-600 hover:border-purple-200"
-                    >
+                    <label className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-50 hover:text-purple-600 hover:border-purple-200 cursor-pointer">
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        accept="image/*,.pdf" 
+                        onChange={(e) => handleFileChange(e, doc.id)} 
+                      />
                       <UploadCloud className="h-3.5 w-3.5" />
                       {t('us_doc_upload')}
-                    </button>
+                    </label>
                   )}
                 </div>
               ))}
