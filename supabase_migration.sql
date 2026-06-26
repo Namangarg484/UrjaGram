@@ -78,9 +78,12 @@ create table if not exists urjasakhi_data (
   electricity_source text check (electricity_source in ('grid', 'offgrid', 'none')),
   monthly_bill       numeric(10, 2),
   roof_type          text check (roof_type in ('concrete', 'tin', 'kacha')),
-  aadhaar_url        text,
-  electricity_bill_url text,
-  rooftop_photo_url  text,
+  aadhaar_front_url  text,
+  aadhaar_back_url   text,
+  electricity_bill_front_url text,
+  electricity_bill_back_url  text,
+  rooftop_photo_front_url  text,
+  rooftop_photo_back_url   text,
   status             text not null default 'pending_push'
                      check (status in ('pending_push', 'pushed')),
   created_at         timestamptz not null default now()

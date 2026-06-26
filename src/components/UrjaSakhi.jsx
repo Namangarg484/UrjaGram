@@ -14,18 +14,25 @@ export default function UrjaSakhi({ showToast }) {
     monthlyBill: '',
     roofType: 'concrete',
   });
-  const [documents, setDocuments] = useState({ aadhaar: null, bill: null, photo: null });
-  const [uploadingDoc, setUploadingDoc] = useState(null);
+  const [documents, setDocuments] = useState({ 
+    aadhaar: { front: null, back: null }, 
+    bill: { front: null, back: null }, 
+    photo: { front: null, back: null } 
+  });
+  const [uploadingDoc, setUploadingDoc] = useState({ id: null, side: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pushSuccess, setPushSuccess] = useState(false);
 
-  const handleFileChange = (e, type) => {
+  const handleFileChange = (e, type, side) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setUploadingDoc(type);
+      setUploadingDoc({ id: type, side });
       setTimeout(() => {
-        setDocuments(prev => ({ ...prev, [type]: file.name }));
-        setUploadingDoc(null);
+        setDocuments(prev => ({ 
+          ...prev, 
+          [type]: { ...prev[type], [side]: file.name } 
+        }));
+        setUploadingDoc({ id: null, side: null });
         showToast(`Document uploaded successfully`, 'success');
       }, 1200);
     }
@@ -56,9 +63,12 @@ export default function UrjaSakhi({ showToast }) {
           electricity_source: formData.electricitySource,
           monthly_bill: formData.monthlyBill ? parseFloat(formData.monthlyBill) : null,
           roof_type: formData.roofType,
-          aadhaar_url: documents.aadhaar,
-          electricity_bill_url: documents.bill,
-          rooftop_photo_url: documents.photo,
+          aadhaar_front_url: documents.aadhaar.front,
+          aadhaar_back_url: documents.aadhaar.back,
+          electricity_bill_front_url: documents.bill.front,
+          electricity_bill_back_url: documents.bill.back,
+          rooftop_photo_front_url: documents.photo.front,
+          rooftop_photo_back_url: documents.photo.back,
           status: 'pushed'
         }]);
         
@@ -82,7 +92,11 @@ export default function UrjaSakhi({ showToast }) {
           monthlyBill: '',
           roofType: 'concrete',
         });
-        setDocuments({ aadhaar: null, bill: null, photo: null });
+        setDocuments({ 
+          aadhaar: { front: null, back: null }, 
+          bill: { front: null, back: null }, 
+          photo: { front: null, back: null } 
+        });
         setPushSuccess(false);
       }, 3000);
 
@@ -253,30 +267,37 @@ export default function UrjaSakhi({ showToast }) {
                 { id: 'bill', label: t('us_doc_bill') },
                 { id: 'photo', label: t('us_doc_photo') },
               ].map((doc) => (
-                <div key={doc.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white/50 p-3">
-                  <span className="text-sm font-medium text-slate-700">{doc.label}</span>
-                  {documents[doc.id] ? (
-                    <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
-                      <FileCheck2 className="h-3.5 w-3.5" />
-                      {t('us_doc_uploaded')}
-                    </div>
-                  ) : uploadingDoc === doc.id ? (
-                    <div className="flex items-center gap-1.5 rounded-full bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700">
-                      <div className="h-3 w-3 animate-spin rounded-full border-2 border-purple-300 border-t-purple-600" />
-                      Uploading...
-                    </div>
-                  ) : (
-                    <label className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-50 hover:text-purple-600 hover:border-purple-200 cursor-pointer">
-                      <input 
-                        type="file" 
-                        className="hidden" 
-                        accept="image/*,.pdf" 
-                        onChange={(e) => handleFileChange(e, doc.id)} 
-                      />
-                      <UploadCloud className="h-3.5 w-3.5" />
-                      {t('us_doc_upload')}
-                    </label>
-                  )}
+                <div key={doc.id} className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white/50 p-3">
+                  <span className="text-sm font-semibold text-slate-800">{doc.label}</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['front', 'back'].map((side) => (
+                      <div key={side} className="flex items-center justify-between rounded-lg border border-slate-100 bg-white/80 p-2">
+                        <span className="text-xs font-medium text-slate-600">{side === 'front' ? t('us_doc_front') : t('us_doc_back')}</span>
+                        {documents[doc.id][side] ? (
+                          <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                            <FileCheck2 className="h-3 w-3" />
+                            {t('us_doc_uploaded')}
+                          </div>
+                        ) : uploadingDoc.id === doc.id && uploadingDoc.side === side ? (
+                          <div className="flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-bold text-purple-700">
+                            <div className="h-2.5 w-2.5 animate-spin rounded-full border-2 border-purple-300 border-t-purple-600" />
+                            ...
+                          </div>
+                        ) : (
+                          <label className="flex items-center gap-1 rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-100 hover:text-purple-600 hover:border-purple-200 cursor-pointer">
+                            <input 
+                              type="file" 
+                              className="hidden" 
+                              accept="image/*,.pdf" 
+                              onChange={(e) => handleFileChange(e, doc.id, side)} 
+                            />
+                            <UploadCloud className="h-3 w-3" />
+                            {t('us_doc_upload')}
+                          </label>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>

@@ -88,6 +88,8 @@ export const translations = {
     us_doc_aadhaar: "Aadhaar Card (Front & Back)",
     us_doc_bill: "Recent Electricity Bill",
     us_doc_photo: "Rooftop / Site Photo",
+    us_doc_front: "Front",
+    us_doc_back: "Back",
     us_doc_upload: "Upload",
     us_doc_uploaded: "Uploaded",
     us_submit: "Save & Push to DISCOM/MNRE"
@@ -181,6 +183,8 @@ export const translations = {
     us_doc_aadhaar: "आधार कार्ड (Aadhaar Card)",
     us_doc_bill: "हाल का बिजली बिल (Electricity Bill)",
     us_doc_photo: "छत / साइट की फोटो (Site Photo)",
+    us_doc_front: "सामने (Front)",
+    us_doc_back: "पीछे (Back)",
     us_doc_upload: "अपलोड करें",
     us_doc_uploaded: "अपलोड हो गया",
     us_submit: "सहेजें और DISCOM/MNRE को भेजें"
