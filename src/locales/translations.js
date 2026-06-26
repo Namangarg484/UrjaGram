@@ -85,6 +85,11 @@ export const translations = {
     us_form_roof_concrete: "Concrete / RCC",
     us_form_roof_tin: "Tin / Asbestos",
     us_form_roof_kacha: "Kacha / Thatched",
+    us_doc_aadhaar: "Aadhaar Card (Front & Back)",
+    us_doc_bill: "Recent Electricity Bill",
+    us_doc_photo: "Rooftop / Site Photo",
+    us_doc_upload: "Upload",
+    us_doc_uploaded: "Uploaded",
     us_submit: "Save & Push to DISCOM/MNRE"
   },
   hi: {
@@ -173,6 +178,11 @@ export const translations = {
     us_form_roof_concrete: "पक्की / आरसीसी (Concrete)",
     us_form_roof_tin: "टिन / एस्बेस्टस (Tin)",
     us_form_roof_kacha: "कच्ची (Kacha)",
+    us_doc_aadhaar: "आधार कार्ड (Aadhaar Card)",
+    us_doc_bill: "हाल का बिजली बिल (Electricity Bill)",
+    us_doc_photo: "छत / साइट की फोटो (Site Photo)",
+    us_doc_upload: "अपलोड करें",
+    us_doc_uploaded: "अपलोड हो गया",
     us_submit: "सहेजें और DISCOM/MNRE को भेजें"
   }
 };

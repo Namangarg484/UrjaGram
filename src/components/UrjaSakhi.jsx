@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Users, Send, CheckCircle2 } from 'lucide-react';
+import { Users, Send, CheckCircle2, UploadCloud, FileCheck2 } from 'lucide-react';
 import { supabase } from '../utils/supabaseClient';
 
 export default function UrjaSakhi({ showToast }) {
@@ -14,8 +14,19 @@ export default function UrjaSakhi({ showToast }) {
     monthlyBill: '',
     roofType: 'concrete',
   });
+  const [documents, setDocuments] = useState({ aadhaar: null, bill: null, photo: null });
+  const [uploadingDoc, setUploadingDoc] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pushSuccess, setPushSuccess] = useState(false);
+
+  const handleFileUpload = (type) => {
+    setUploadingDoc(type);
+    setTimeout(() => {
+      setDocuments(prev => ({ ...prev, [type]: `mock_${type}_${Date.now()}.pdf` }));
+      setUploadingDoc(null);
+      showToast(`Document uploaded successfully`, 'success');
+    }, 1200);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,6 +53,9 @@ export default function UrjaSakhi({ showToast }) {
           electricity_source: formData.electricitySource,
           monthly_bill: formData.monthlyBill ? parseFloat(formData.monthlyBill) : null,
           roof_type: formData.roofType,
+          aadhaar_url: documents.aadhaar,
+          electricity_bill_url: documents.bill,
+          rooftop_photo_url: documents.photo,
           status: 'pushed'
         }]);
         
@@ -65,6 +79,7 @@ export default function UrjaSakhi({ showToast }) {
           monthlyBill: '',
           roofType: 'concrete',
         });
+        setDocuments({ aadhaar: null, bill: null, photo: null });
         setPushSuccess(false);
       }, 3000);
 
@@ -220,6 +235,44 @@ export default function UrjaSakhi({ showToast }) {
                   />
                   {rt.label}
                 </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Document Uploads */}
+          <div>
+            <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+              Required Documents
+            </label>
+            <div className="space-y-3">
+              {[
+                { id: 'aadhaar', label: t('us_doc_aadhaar') },
+                { id: 'bill', label: t('us_doc_bill') },
+                { id: 'photo', label: t('us_doc_photo') },
+              ].map((doc) => (
+                <div key={doc.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white/50 p-3">
+                  <span className="text-sm font-medium text-slate-700">{doc.label}</span>
+                  {documents[doc.id] ? (
+                    <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
+                      <FileCheck2 className="h-3.5 w-3.5" />
+                      {t('us_doc_uploaded')}
+                    </div>
+                  ) : uploadingDoc === doc.id ? (
+                    <div className="flex items-center gap-1.5 rounded-full bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700">
+                      <div className="h-3 w-3 animate-spin rounded-full border-2 border-purple-300 border-t-purple-600" />
+                      Uploading...
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleFileUpload(doc.id)}
+                      className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-50 hover:text-purple-600 hover:border-purple-200"
+                    >
+                      <UploadCloud className="h-3.5 w-3.5" />
+                      {t('us_doc_upload')}
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
           </div>

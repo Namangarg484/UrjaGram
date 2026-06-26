@@ -36,9 +36,8 @@ const VETOS_STEPS = [
 ];
 
 const VENDOR_STEPS = [
-  'Client Site AI Assessment',
+  'Review UrjaSakhi Lead Data',
   'Technical Proposal & Load Calculation',
-  'Collect Client KYC Documents',
   'KYC Pre-Check & Verification',
   'Submit Technical Proposal to DISCOM',
   'Install Plant & Upload Commissioning Report'
