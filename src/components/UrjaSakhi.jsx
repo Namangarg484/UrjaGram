@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Users, Send, CheckCircle2, UploadCloud, FileCheck2, Building2, Zap, Landmark } from 'lucide-react';
+import { Users, Send, CheckCircle2, UploadCloud, FileCheck2, Building2, Zap, Landmark, Camera } from 'lucide-react';
 import { supabase } from '../utils/supabaseClient';
 
 export default function UrjaSakhi({ showToast }) {
@@ -331,11 +331,16 @@ export default function UrjaSakhi({ showToast }) {
                           <div className="h-3 w-3 animate-spin rounded-full border-2 border-purple-300 border-t-purple-600" />
                         </div>
                       ) : (
-                        <label className="flex items-center gap-1 rounded-full bg-slate-50 px-2 py-1 text-[10px] font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-100 hover:text-blue-600 hover:border-blue-200 cursor-pointer">
-                          <input type="file" className="hidden" accept="image/*,.pdf" onChange={(e) => handleFileChange(e, doc.id, side)} />
-                          <UploadCloud className="h-3 w-3" />
-                          Upload
-                        </label>
+                        <div className="flex gap-1 w-full mt-auto">
+                          <label className="flex flex-1 items-center justify-center gap-1 rounded-full bg-slate-50 py-1 text-[10px] font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-100 hover:text-blue-600 hover:border-blue-200 cursor-pointer" title="Take Photo">
+                            <input type="file" className="hidden" accept="image/*" capture="environment" onChange={(e) => handleFileChange(e, doc.id, side)} />
+                            <Camera className="h-3 w-3" />
+                          </label>
+                          <label className="flex flex-1 items-center justify-center gap-1 rounded-full bg-slate-50 py-1 text-[10px] font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-100 hover:text-blue-600 hover:border-blue-200 cursor-pointer" title="Upload File">
+                            <input type="file" className="hidden" accept="image/*,.pdf" onChange={(e) => handleFileChange(e, doc.id, side)} />
+                            <UploadCloud className="h-3 w-3" />
+                          </label>
+                        </div>
                       )}
                     </div>
                   ))}
@@ -360,11 +365,18 @@ export default function UrjaSakhi({ showToast }) {
                     <div className="h-3 w-3 animate-spin rounded-full border-2 border-purple-300 border-t-purple-600" />
                   </div>
                 ) : (
-                  <label className="flex items-center gap-1 rounded-full bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-100 hover:text-blue-600 hover:border-blue-200 cursor-pointer mt-auto">
-                    <input type="file" multiple className="hidden" accept="image/*" onChange={handlePhotosChange} />
-                    <UploadCloud className="h-4 w-4" />
-                    Upload Photos
-                  </label>
+                  <div className="flex gap-2 w-full mt-auto">
+                    <label className="flex flex-1 items-center justify-center gap-1 rounded-full bg-slate-50 py-1.5 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-100 hover:text-blue-600 hover:border-blue-200 cursor-pointer">
+                      <input type="file" multiple className="hidden" accept="image/*" capture="environment" onChange={handlePhotosChange} />
+                      <Camera className="h-4 w-4" />
+                      Camera
+                    </label>
+                    <label className="flex flex-1 items-center justify-center gap-1 rounded-full bg-slate-50 py-1.5 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-100 hover:text-blue-600 hover:border-blue-200 cursor-pointer">
+                      <input type="file" multiple className="hidden" accept="image/*" onChange={handlePhotosChange} />
+                      <UploadCloud className="h-4 w-4" />
+                      Upload
+                    </label>
+                  </div>
                 )}
               </div>
             </div>
