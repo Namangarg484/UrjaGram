@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Users, Send, CheckCircle2, UploadCloud, FileCheck2, Building2, Zap, Landmark, Camera } from 'lucide-react';
 import { supabase } from '../utils/supabaseClient';
@@ -33,6 +33,70 @@ export default function UrjaSakhi({ showToast }) {
   const [uploadingDoc, setUploadingDoc] = useState({ id: null, side: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pushSuccess, setPushSuccess] = useState(false);
+
+  // --- Camera Logic ---
+  const [cameraActiveFor, setCameraActiveFor] = useState(null); 
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+
+  useEffect(() => {
+    if (cameraActiveFor && videoRef.current && streamRef.current) {
+        videoRef.current.srcObject = streamRef.current;
+    }
+  }, [cameraActiveFor]);
+
+  useEffect(() => {
+    return () => stopCamera();
+  }, []);
+
+  const startCamera = async (docId, side, isMultiple = false) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      streamRef.current = stream;
+      setCameraActiveFor({ docId, side, isMultiple });
+    } catch (err) {
+      console.error(err);
+      showToast('Could not access camera. Please check permissions.', 'error');
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setCameraActiveFor(null);
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = videoRef.current.videoWidth;
+    canvas.height = videoRef.current.videoHeight;
+    canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
+    
+    canvas.toBlob(blob => {
+      const file = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      const { docId, side, isMultiple } = cameraActiveFor;
+      stopCamera();
+      
+      if (isMultiple) {
+         setUploadingDoc({ id: 'photos', side: 'all' });
+         setTimeout(() => {
+           setDocuments(prev => ({ ...prev, photos: [...prev.photos, file.name] }));
+           setUploadingDoc({ id: null, side: null });
+           showToast(`1 photo captured successfully`, 'success');
+         }, 500);
+      } else {
+         setUploadingDoc({ id: docId, side });
+         setTimeout(() => {
+           setDocuments(prev => ({ ...prev, [docId]: { ...prev[docId], [side]: file.name } }));
+           setUploadingDoc({ id: null, side: null });
+           showToast(`Document captured successfully`, 'success');
+         }, 500);
+      }
+    }, 'image/jpeg');
+  };
 
   const handleFileChange = (e, type, side) => {
     if (e.target.files && e.target.files[0]) {
@@ -190,8 +254,23 @@ export default function UrjaSakhi({ showToast }) {
   };
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="mb-6 flex items-center gap-3">
+    <>
+      {cameraActiveFor && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
+          <video ref={videoRef} autoPlay playsInline className="max-h-[70vh] w-full max-w-md rounded-2xl bg-black object-cover shadow-2xl" />
+          <div className="mt-8 flex gap-6">
+            <button type="button" onClick={stopCamera} className="rounded-full bg-white/10 border border-white/20 px-6 py-3 font-semibold text-white backdrop-blur-md transition hover:bg-white/20">
+              Cancel
+            </button>
+            <button type="button" onClick={capturePhoto} className="flex items-center gap-2 rounded-full bg-purple-600 px-8 py-3 font-bold text-white shadow-[0_0_20px_rgba(147,51,234,0.5)] transition hover:bg-purple-500 hover:scale-105 active:scale-95">
+              <Camera className="h-5 w-5" />
+              Capture
+            </button>
+          </div>
+        </div>
+      )}
+      <div className="mx-auto max-w-3xl">
+        <div className="mb-6 flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-600 shadow-lg shadow-purple-500/20">
           <Users className="h-6 w-6 text-white" />
         </div>
@@ -332,10 +411,9 @@ export default function UrjaSakhi({ showToast }) {
                         </div>
                       ) : (
                         <div className="flex gap-1 w-full mt-auto">
-                          <label className="flex flex-1 items-center justify-center gap-1 rounded-full bg-slate-50 py-1 text-[10px] font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-100 hover:text-blue-600 hover:border-blue-200 cursor-pointer" title="Take Photo">
-                            <input type="file" className="hidden" accept="image/*" capture="environment" onChange={(e) => handleFileChange(e, doc.id, side)} />
+                          <button type="button" onClick={() => startCamera(doc.id, side, false)} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-slate-50 py-1 text-[10px] font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-100 hover:text-blue-600 hover:border-blue-200 cursor-pointer" title="Take Photo">
                             <Camera className="h-3 w-3" />
-                          </label>
+                          </button>
                           <label className="flex flex-1 items-center justify-center gap-1 rounded-full bg-slate-50 py-1 text-[10px] font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-100 hover:text-blue-600 hover:border-blue-200 cursor-pointer" title="Upload File">
                             <input type="file" className="hidden" accept="image/*,.pdf" onChange={(e) => handleFileChange(e, doc.id, side)} />
                             <UploadCloud className="h-3 w-3" />
@@ -366,11 +444,10 @@ export default function UrjaSakhi({ showToast }) {
                   </div>
                 ) : (
                   <div className="flex gap-2 w-full mt-auto">
-                    <label className="flex flex-1 items-center justify-center gap-1 rounded-full bg-slate-50 py-1.5 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-100 hover:text-blue-600 hover:border-blue-200 cursor-pointer">
-                      <input type="file" multiple className="hidden" accept="image/*" capture="environment" onChange={handlePhotosChange} />
+                    <button type="button" onClick={() => startCamera('photos', 'all', true)} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-slate-50 py-1.5 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-100 hover:text-blue-600 hover:border-blue-200 cursor-pointer">
                       <Camera className="h-4 w-4" />
                       Camera
-                    </label>
+                    </button>
                     <label className="flex flex-1 items-center justify-center gap-1 rounded-full bg-slate-50 py-1.5 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-100 hover:text-blue-600 hover:border-blue-200 cursor-pointer">
                       <input type="file" multiple className="hidden" accept="image/*" onChange={handlePhotosChange} />
                       <UploadCloud className="h-4 w-4" />
@@ -414,5 +491,6 @@ export default function UrjaSakhi({ showToast }) {
         </div>
       </form>
     </div>
+    </>
   );
 }
