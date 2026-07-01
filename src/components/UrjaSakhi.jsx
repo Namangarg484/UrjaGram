@@ -353,7 +353,7 @@ export default function UrjaSakhi({ showToast }) {
             ) : (
               <>
                 <Send className="h-5 w-5" />
-                <span>Submit to Govt & Vendor Systems (Wrapper)</span>
+                <span>{t('us_submit')}</span>
               </>
             )}
           </button>
