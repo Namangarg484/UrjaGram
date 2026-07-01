@@ -28,7 +28,7 @@ export default function UrjaSakhi({ showToast }) {
   const [documents, setDocuments] = useState({ 
     aadhaar: { front: null, back: null }, 
     bill: { front: null, back: null }, 
-    photo: { front: null, back: null } 
+    photos: [] 
   });
   const [uploadingDoc, setUploadingDoc] = useState({ id: null, side: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,6 +45,22 @@ export default function UrjaSakhi({ showToast }) {
         }));
         setUploadingDoc({ id: null, side: null });
         showToast(`Document uploaded successfully`, 'success');
+      }, 1200);
+    }
+  };
+
+  const handlePhotosChange = (e) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      const fileNames = files.map(f => f.name);
+      setUploadingDoc({ id: 'photos', side: 'all' });
+      setTimeout(() => {
+        setDocuments(prev => ({ 
+          ...prev, 
+          photos: [...prev.photos, ...fileNames] 
+        }));
+        setUploadingDoc({ id: null, side: null });
+        showToast(`${fileNames.length} photo(s) uploaded successfully`, 'success');
       }, 1200);
     }
   };
@@ -85,8 +101,9 @@ export default function UrjaSakhi({ showToast }) {
           aadhaarBackUrl: documents.aadhaar.back,
           electricityBillFrontUrl: documents.bill.front,
           electricityBillBackUrl: documents.bill.back,
-          rooftopPhotoFrontUrl: documents.photo.front,
-          rooftopPhotoBackUrl: documents.photo.back,
+          rooftopPhotoFrontUrl: documents.photos.length > 0 ? documents.photos[0] : null,
+          rooftopPhotoBackUrl: documents.photos.length > 1 ? documents.photos[1] : null,
+          rooftopPhotosList: documents.photos,
       };
 
       // 1. Push data to Backend Wrapper
@@ -125,8 +142,8 @@ export default function UrjaSakhi({ showToast }) {
           aadhaar_back_url: documents.aadhaar.back,
           electricity_bill_front_url: documents.bill.front,
           electricity_bill_back_url: documents.bill.back,
-          rooftop_photo_front_url: documents.photo.front,
-          rooftop_photo_back_url: documents.photo.back,
+          rooftop_photo_front_url: documents.photos.length > 0 ? documents.photos[0] : null,
+          rooftop_photo_back_url: documents.photos.length > 1 ? documents.photos[1] : null,
           status: 'pushed'
         }]);
       }
@@ -159,7 +176,7 @@ export default function UrjaSakhi({ showToast }) {
         setDocuments({ 
           aadhaar: { front: null, back: null }, 
           bill: { front: null, back: null }, 
-          photo: { front: null, back: null } 
+          photos: [] 
         });
         setPushSuccess(false);
       }, 3000);
@@ -297,7 +314,6 @@ export default function UrjaSakhi({ showToast }) {
             {[
               { id: 'aadhaar', label: 'Aadhaar Card' },
               { id: 'bill', label: 'Electricity Bill' },
-              { id: 'photo', label: 'Rooftop Photo' },
             ].map((doc) => (
               <div key={doc.id} className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white/50 p-3">
                 <span className="text-sm font-semibold text-slate-800">{doc.label}</span>
@@ -326,6 +342,32 @@ export default function UrjaSakhi({ showToast }) {
                 </div>
               </div>
             ))}
+            
+            {/* Rooftop Photos */}
+            <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white/50 p-3">
+              <span className="text-sm font-semibold text-slate-800">Rooftop Photos</span>
+              <div className="flex flex-col gap-2 rounded-lg border border-slate-100 bg-white/80 p-2 items-center justify-center h-full min-h-[96px]">
+                {documents.photos.length > 0 && (
+                  <div className="flex flex-wrap gap-1 justify-center mb-2">
+                     <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                        <FileCheck2 className="h-3 w-3" />
+                        {documents.photos.length} Uploaded
+                     </div>
+                  </div>
+                )}
+                {uploadingDoc.id === 'photos' ? (
+                  <div className="flex items-center gap-1 rounded-full bg-purple-50 px-2 py-1 text-[10px] font-bold text-purple-700">
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-purple-300 border-t-purple-600" />
+                  </div>
+                ) : (
+                  <label className="flex items-center gap-1 rounded-full bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600 border border-slate-200 shadow-sm transition hover:bg-slate-100 hover:text-blue-600 hover:border-blue-200 cursor-pointer mt-auto">
+                    <input type="file" multiple className="hidden" accept="image/*" onChange={handlePhotosChange} />
+                    <UploadCloud className="h-4 w-4" />
+                    Upload Photos
+                  </label>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -353,7 +395,7 @@ export default function UrjaSakhi({ showToast }) {
             ) : (
               <>
                 <Send className="h-5 w-5" />
-                <span>{t('us_submit')}</span>
+                <span>Save</span>
               </>
             )}
           </button>
