@@ -16,8 +16,8 @@ import {
 import GoiRpaSync from './GoiRpaSync';
 import SmartVendorMatch from './SmartVendorMatch';
 
-const roofTypeOptions = [
-  { value: 'flat', label: 'Flat / RCC' },
+const ROOF_TYPES = [
+  { value: 'concrete', label: 'Concrete / RCC' },
   { value: 'sloped', label: 'Sloped / Tiled' },
   { value: 'mixed', label: 'Mixed' },
 ];
@@ -86,7 +86,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
   
   const [form, setForm] = useState({
     state: 'haryana',
-    roofType: 'flat',
+    roofType: 'concrete',
     buildingType: 'residential',
     estimatedMonthlyIncome: 15000,
     villageName: '',
@@ -641,18 +641,44 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
       case 4:
         return (
           <div className="space-y-6">
-            <SmartVendorMatch 
-              requiredLoad={predictedLoad}
-              onVendorSelect={(vendorId) => {
-                markStepComplete(4);
-                setStep(5);
-              }}
-            />
+            {userRole === 'vendor' ? (
+              <div className="text-center py-12 bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[2.5rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-8">
+                <Store className="h-16 w-16 text-indigo-400 mx-auto mb-4" />
+                <h3 className="text-2xl font-black text-ink mb-2">Awaiting Household Approval</h3>
+                <p className="text-muted">The household is currently reviewing your quotation.</p>
+                <button onClick={() => { markStepComplete(step); setStep(step + 1); }} className="mt-8 bg-indigo-600 text-white font-bold px-8 py-3 rounded-2xl hover:bg-indigo-700 transition">Simulate Approval</button>
+              </div>
+            ) : (
+              <SmartVendorMatch 
+                requiredLoad={predictedLoad}
+                onVendorSelect={(vendorId) => {
+                  markStepComplete(4);
+                  setStep(5);
+                }}
+              />
+            )}
             {renderVetosDetails(vetosData)}
           </div>
         );
 
-      case 5:
+      case 5: {
+        const showFinancingForMNRE = false; // Hide from MNRE pitch
+        
+        if (!showFinancingForMNRE) {
+          return (
+            <div className="space-y-6 animate-in slide-in-from-right-8 duration-700 ease-out">
+              <div className="text-center py-12 bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[2.5rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-8 relative overflow-hidden">
+                <h3 className="text-2xl font-black tracking-tight text-ink mb-2">Household Final Review</h3>
+                <p className="text-muted text-base max-w-md mx-auto leading-relaxed mb-8 font-medium">Pending household approval and vendor confirmation.</p>
+                <div className="flex justify-center gap-4">
+                  <button onClick={() => { showToast('Proceeding to Next Step'); markStepComplete(5); setTimeout(() => setStep(6), 1000); }} className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">Simulate Final Approval</button>
+                </div>
+              </div>
+              {renderVetosDetails(vetosData)}
+            </div>
+          );
+        }
+
         return (
           <div className="space-y-6 animate-in slide-in-from-right-8 duration-700 ease-out">
             <div className="text-center py-12 bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[2.5rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-8 relative overflow-hidden">
@@ -690,6 +716,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
             {renderVetosDetails(vetosData)}
           </div>
         );
+      }
 
       case 7:
       case 8:

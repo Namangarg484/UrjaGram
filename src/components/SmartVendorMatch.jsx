@@ -4,7 +4,7 @@ import { Store, Star, Clock, MapPin, CheckCircle2, ShieldAlert, ArrowRight, Tren
 export default function SmartVendorMatch({ requiredLoad, onVendorSelect }) {
   const [selectedId, setSelectedId] = useState(null);
 
-  // Mock hybrid vendor data (MNRE scraped + UrjaGram onboarded)
+  // Mock hybrid vendor data (External Vendor + UrjaGram onboarded)
   const vendors = [
     {
       id: 'v1',
@@ -21,7 +21,7 @@ export default function SmartVendorMatch({ requiredLoad, onVendorSelect }) {
     {
       id: 'v2',
       name: "EcoTech Energy Co.",
-      source: "MNRE Scraped",
+      source: "External Vendor",
       rating: 4.2,
       installs: 38,
       sla: "14-21 Days",
@@ -53,7 +53,7 @@ export default function SmartVendorMatch({ requiredLoad, onVendorSelect }) {
     <div className="space-y-6 animate-in slide-in-from-right-8 duration-700 ease-out">
       <div>
         <h3 className="text-3xl font-black tracking-tight text-ink">Smart Vendor Matchmaking</h3>
-        <p className="text-base font-medium text-muted mt-1.5">Bypassing the opaque MNRE portal. Select a verified UrjaGram partner for guaranteed SLA and parallel loan approval.</p>
+        <p className="text-base font-medium text-muted mt-1.5">Select a verified UrjaGram partner for guaranteed SLA and parallel loan approval.</p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-5 relative z-10">

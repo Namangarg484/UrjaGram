@@ -6,7 +6,7 @@ export default function GoiRpaSync({ isSyncing, onSyncComplete }) {
 
   const steps = [
     { label: "Initializing RPA Handshake...", detail: "Connecting to pmsuryaghar.gov.in via secure proxy" },
-    { label: "Bypassing Captcha...", detail: "Using AI vision model for captcha resolution" },
+    { label: "Resolving Captcha...", detail: "Using AI vision model for captcha resolution" },
     { label: "Pushing Consumer Data...", detail: "Injecting Aadhaar, Bill, and predicted load payload" },
     { label: "Validating Success Hash...", detail: "Verifying GOI server response 200 OK" }
   ];

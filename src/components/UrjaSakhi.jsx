@@ -8,8 +8,8 @@ export default function UrjaSakhi({ showToast }) {
   const [formData, setFormData] = useState({
     householdHead: '',
     contactNumber: '',
+    contactNumber: '',
     email: '',
-    aadhaarNumber: '',
     state: '',
     district: '',
     address: '',
@@ -26,13 +26,14 @@ export default function UrjaSakhi({ showToast }) {
     bankIfsc: '',
   });
   const [documents, setDocuments] = useState({ 
-    aadhaar: { front: null, back: null }, 
     bill: { front: null, back: null }, 
+    bankProof: { front: null },
     photos: [] 
   });
   const [uploadingDoc, setUploadingDoc] = useState({ id: null, side: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pushSuccess, setPushSuccess] = useState(false);
+  const [isDigilockerVerified, setIsDigilockerVerified] = useState(false);
 
   // --- Camera Logic ---
   const [cameraActiveFor, setCameraActiveFor] = useState(null); 
@@ -145,7 +146,6 @@ export default function UrjaSakhi({ showToast }) {
           householdHead: formData.householdHead,
           contactNumber: formData.contactNumber,
           email: formData.email || undefined,
-          aadhaarNumber: formData.aadhaarNumber || undefined,
           state: formData.state,
           district: formData.district,
           address: formData.address,
@@ -161,8 +161,7 @@ export default function UrjaSakhi({ showToast }) {
           bankName: formData.bankName || undefined,
           bankAccountNumber: formData.bankAccountNumber || undefined,
           bankIfsc: formData.bankIfsc || undefined,
-          aadhaarFrontUrl: documents.aadhaar.front,
-          aadhaarBackUrl: documents.aadhaar.back,
+          bankProofUrl: documents.bankProof.front,
           electricityBillFrontUrl: documents.bill.front,
           electricityBillBackUrl: documents.bill.back,
           rooftopPhotoFrontUrl: documents.photos.length > 0 ? documents.photos[0] : null,
@@ -187,7 +186,6 @@ export default function UrjaSakhi({ showToast }) {
           household_head: formData.householdHead,
           contact_number: formData.contactNumber,
           email: formData.email,
-          aadhaar_number: formData.aadhaarNumber,
           state: formData.state,
           district: formData.district,
           address: formData.address,
@@ -202,8 +200,7 @@ export default function UrjaSakhi({ showToast }) {
           bank_name: formData.bankName,
           bank_account_number: formData.bankAccountNumber,
           bank_ifsc: formData.bankIfsc,
-          aadhaar_front_url: documents.aadhaar.front,
-          aadhaar_back_url: documents.aadhaar.back,
+          bank_proof_url: documents.bankProof.front,
           electricity_bill_front_url: documents.bill.front,
           electricity_bill_back_url: documents.bill.back,
           rooftop_photo_front_url: documents.photos.length > 0 ? documents.photos[0] : null,
@@ -221,7 +218,6 @@ export default function UrjaSakhi({ showToast }) {
           householdHead: '',
           contactNumber: '',
           email: '',
-          aadhaarNumber: '',
           state: '',
           district: '',
           address: '',
@@ -238,11 +234,12 @@ export default function UrjaSakhi({ showToast }) {
           bankIfsc: '',
         });
         setDocuments({ 
-          aadhaar: { front: null, back: null }, 
           bill: { front: null, back: null }, 
+          bankProof: { front: null },
           photos: [] 
         });
         setPushSuccess(false);
+        setIsDigilockerVerified(false);
       }, 3000);
 
     } catch (error) {
@@ -302,8 +299,18 @@ export default function UrjaSakhi({ showToast }) {
               <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full rounded-xl border border-slate-200 bg-white/50 px-4 py-2.5 text-sm transition focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-purple-500/10" placeholder="email@example.com" />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-slate-700">Aadhaar Number</label>
-              <input type="text" name="aadhaarNumber" value={formData.aadhaarNumber} onChange={handleChange} required className="w-full rounded-xl border border-slate-200 bg-white/50 px-4 py-2.5 text-sm transition focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-purple-500/10" placeholder="12-digit Aadhaar" />
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">Identity Verification</label>
+              {isDigilockerVerified ? (
+                <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-bold text-emerald-700">
+                  <CheckCircle2 className="h-5 w-5" />
+                  Verified via DigiLocker
+                </div>
+              ) : (
+                <button type="button" onClick={() => { showToast('Redirecting to DigiLocker...', 'success'); setTimeout(() => setIsDigilockerVerified(true), 1500); }} className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 transition hover:bg-blue-100">
+                  <FileCheck2 className="h-5 w-5" />
+                  Verify with DigiLocker
+                </button>
+              )}
             </div>
             <div className="sm:col-span-2">
               <label className="mb-1.5 block text-sm font-semibold text-slate-700">Address</label>
@@ -353,7 +360,7 @@ export default function UrjaSakhi({ showToast }) {
                 {['concrete', 'tin', 'kacha'].map((rt) => (
                   <label key={rt} className={`flex cursor-pointer items-center justify-center rounded-xl border px-3 py-2.5 text-center text-xs font-medium transition ${formData.roofType === rt ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-200 bg-white/50 text-slate-600 hover:bg-white'}`}>
                     <input type="radio" name="roofType" value={rt} checked={formData.roofType === rt} onChange={handleChange} className="sr-only" />
-                    {rt.charAt(0).toUpperCase() + rt.slice(1)}
+                    {rt === 'concrete' ? 'Concrete / RCC' : rt.charAt(0).toUpperCase() + rt.slice(1)}
                   </label>
                 ))}
               </div>
@@ -391,15 +398,15 @@ export default function UrjaSakhi({ showToast }) {
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {[
-              { id: 'aadhaar', label: 'Aadhaar Card' },
-              { id: 'bill', label: 'Electricity Bill' },
+              { id: 'bill', label: 'Electricity Bill', sides: ['front', 'back'] },
+              { id: 'bankProof', label: 'Bank Proof (Cheque/Passbook)', sides: ['front'] },
             ].map((doc) => (
               <div key={doc.id} className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white/50 p-3">
                 <span className="text-sm font-semibold text-slate-800">{doc.label}</span>
-                <div className="grid grid-cols-2 gap-2">
-                  {['front', 'back'].map((side) => (
+                <div className={`grid gap-2 ${doc.sides.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                  {doc.sides.map((side) => (
                     <div key={side} className="flex flex-col gap-2 rounded-lg border border-slate-100 bg-white/80 p-2 items-center justify-center">
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">{side}</span>
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">{doc.sides.length === 2 ? side : 'Upload'}</span>
                       {documents[doc.id][side] ? (
                         <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700 border border-emerald-200">
                           <FileCheck2 className="h-3 w-3" />
@@ -464,7 +471,7 @@ export default function UrjaSakhi({ showToast }) {
         <div className="pt-2">
           <button
             type="submit"
-            disabled={isSubmitting || pushSuccess}
+            disabled={isSubmitting || pushSuccess || !isDigilockerVerified}
             className={`flex w-full items-center justify-center gap-2 rounded-xl px-4 py-4 text-base font-bold text-white shadow-lg transition-all focus:outline-none focus:ring-4 ${
               pushSuccess
                 ? 'bg-emerald-500 shadow-emerald-500/30'
