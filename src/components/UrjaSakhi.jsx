@@ -308,7 +308,7 @@ export default function UrjaSakhi({ showToast }) {
                   Verified via DigiLocker
                 </div>
               ) : (
-                <button type="button" onClick={() => { showToast('Redirecting to DigiLocker...', 'success'); setTimeout(() => setIsDigilockerVerified(true), 1500); }} className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 transition hover:bg-blue-100">
+                <button type="button" onClick={() => { window.open('https://digilocker.gov.in/', '_blank'); showToast('Redirecting to DigiLocker...', 'success'); setTimeout(() => setIsDigilockerVerified(true), 1500); }} className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 transition hover:bg-blue-100">
                   <FileCheck2 className="h-5 w-5" />
                   Verify with DigiLocker
                 </button>
