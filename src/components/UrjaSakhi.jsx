@@ -33,6 +33,10 @@ export default function UrjaSakhi({ showToast }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pushSuccess, setPushSuccess] = useState(false);
   const [isDigilockerVerified, setIsDigilockerVerified] = useState(false);
+  
+  // DigiLocker Modal State
+  const [showDigilockerModal, setShowDigilockerModal] = useState(false);
+  const [digiStep, setDigiStep] = useState(1);
 
   // --- Camera Logic ---
   const [cameraActiveFor, setCameraActiveFor] = useState(null); 
@@ -308,7 +312,7 @@ export default function UrjaSakhi({ showToast }) {
                   Verified via DigiLocker
                 </div>
               ) : (
-                <button type="button" onClick={() => { window.open('https://digilocker.gov.in/', '_blank'); showToast('Redirecting to DigiLocker...', 'success'); setTimeout(() => setIsDigilockerVerified(true), 1500); }} className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 transition hover:bg-blue-100">
+                <button type="button" onClick={() => setShowDigilockerModal(true)} className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 transition hover:bg-blue-100">
                   <FileCheck2 className="h-5 w-5" />
                   Verify with DigiLocker
                 </button>
@@ -500,6 +504,55 @@ export default function UrjaSakhi({ showToast }) {
         </div>
       </form>
     </div>
+
+    {/* Simulated DigiLocker Modal */}
+    {showDigilockerModal && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="bg-[#1A2E46] p-5 text-center flex flex-col items-center gap-2">
+            <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-inner">
+              <img src="https://digilocker.gov.in/assets/img/digilocker-logo.png" alt="DigiLocker" className="h-6 w-6 object-contain" onError={(e) => { e.target.onerror = null; e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/e/e0/DigiLocker_logo.png'; }} />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white tracking-wide">DigiLocker</h3>
+              <p className="text-[10px] text-blue-200 uppercase tracking-widest">National eGovernance Division</p>
+            </div>
+          </div>
+          
+          <div className="p-6">
+            {digiStep === 1 ? (
+              <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
+                <p className="text-sm font-bold text-slate-700 text-center mb-6">Sign In to your account!</p>
+                <div className="space-y-3">
+                  <input type="text" placeholder="Aadhaar / Mobile Number" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-medium focus:border-[#1A2E46] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#1A2E46]" />
+                  <input type="password" placeholder="6 digit security PIN" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-medium focus:border-[#1A2E46] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#1A2E46]" />
+                </div>
+                <button type="button" onClick={() => { showToast('Sending OTP...', 'info'); setTimeout(() => setDigiStep(2), 1200); }} className="w-full rounded-xl bg-[#1A2E46] py-3.5 mt-2 text-sm font-bold text-white shadow-md hover:bg-[#112032] hover:shadow-lg transition-all active:scale-[0.98]">Sign In</button>
+                <p className="text-center text-xs text-blue-600 font-semibold cursor-pointer hover:underline mt-4">Forgot security PIN?</p>
+              </div>
+            ) : (
+              <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-6 text-center">
+                  <p className="text-xs font-semibold text-blue-800">OTP sent to your registered mobile number ending in <span className="font-bold text-blue-900">XXXX-484</span></p>
+                </div>
+                <input type="text" placeholder="Enter OTP" maxLength={6} className="w-full text-center tracking-[0.5em] font-black rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-lg focus:border-[#1A2E46] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#1A2E46]" />
+                <button type="button" onClick={() => { 
+                  showToast('Identity Verified Successfully!', 'success'); 
+                  setShowDigilockerModal(false); 
+                  setIsDigilockerVerified(true); 
+                  setDigiStep(1);
+                }} className="w-full rounded-xl bg-emerald-600 py-3.5 text-sm font-bold text-white shadow-md hover:bg-emerald-700 hover:shadow-lg transition-all active:scale-[0.98]">Verify & Proceed</button>
+              </div>
+            )}
+          </div>
+          <div className="bg-slate-50 p-4 text-center border-t border-slate-100 flex justify-between items-center px-6">
+            <span className="text-[10px] text-slate-400 font-medium">Powered by MeitY</span>
+            <button type="button" onClick={() => { setShowDigilockerModal(false); setDigiStep(1); }} className="text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors">Cancel</button>
+          </div>
+        </div>
+      </div>
+    )}
+
     </>
   );
 }
