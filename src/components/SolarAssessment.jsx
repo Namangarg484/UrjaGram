@@ -442,7 +442,7 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
               <div className="space-y-2">
                 <label className="text-[11px] font-bold text-muted uppercase tracking-widest pl-1">{t('sa_roof_type')}</label>
                 <select name="roofType" value={form.roofType} onChange={handleFieldChange} className="w-full rounded-2xl border border-white bg-white/60 backdrop-blur-sm px-5 py-3.5 text-sm font-semibold text-ink outline-none transition-all focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 appearance-none shadow-sm hover:shadow-md">
-                  {roofTypeOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  {ROOF_TYPES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
               </div>
             </div>

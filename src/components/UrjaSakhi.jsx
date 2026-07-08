@@ -8,7 +8,6 @@ export default function UrjaSakhi({ showToast }) {
   const [formData, setFormData] = useState({
     householdHead: '',
     contactNumber: '',
-    contactNumber: '',
     email: '',
     state: '',
     district: '',
