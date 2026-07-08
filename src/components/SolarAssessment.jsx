@@ -644,9 +644,15 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
             {userRole === 'vendor' ? (
               <div className="text-center py-12 bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[2.5rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-8">
                 <Store className="h-16 w-16 text-indigo-400 mx-auto mb-4" />
-                <h3 className="text-2xl font-black text-ink mb-2">Awaiting Household Approval</h3>
-                <p className="text-muted">The household is currently reviewing your quotation.</p>
-                <button onClick={() => { markStepComplete(step); setStep(step + 1); }} className="mt-8 bg-indigo-600 text-white font-bold px-8 py-3 rounded-2xl hover:bg-indigo-700 transition">Simulate Approval</button>
+                <h3 className="text-2xl font-black text-ink mb-2">
+                  {step === 3 ? "KYC Pre-Check & Verification" : step === 4 ? "Submit Technical Proposal to DISCOM" : "Vendor Process Complete"}
+                </h3>
+                <p className="text-muted">
+                  {step === 3 ? "Simulate KYC verification to proceed." : step === 4 ? "Simulate DISCOM submission to proceed." : "You have successfully completed all vendor steps."}
+                </p>
+                {step < 5 && (
+                  <button onClick={() => { markStepComplete(step); setStep(step + 1); }} className="mt-8 bg-indigo-600 text-white font-bold px-8 py-3 rounded-2xl hover:bg-indigo-700 transition">Simulate Completion</button>
+                )}
               </div>
             ) : (
               <SmartVendorMatch 
@@ -668,10 +674,16 @@ export default function SolarAssessment({ villages, saveAssessment, showToast, c
           return (
             <div className="space-y-6 animate-in slide-in-from-right-8 duration-700 ease-out">
               <div className="text-center py-12 bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[2.5rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-8 relative overflow-hidden">
-                <h3 className="text-2xl font-black tracking-tight text-ink mb-2">Household Final Review</h3>
-                <p className="text-muted text-base max-w-md mx-auto leading-relaxed mb-8 font-medium">Pending household approval and vendor confirmation.</p>
+                <h3 className="text-2xl font-black tracking-tight text-ink mb-2">
+                  {userRole === 'vendor' ? "Install Plant & Commissioning" : "Household Final Review"}
+                </h3>
+                <p className="text-muted text-base max-w-md mx-auto leading-relaxed mb-8 font-medium">
+                  {userRole === 'vendor' ? "Finalize the installation process." : "Pending household approval and vendor confirmation."}
+                </p>
                 <div className="flex justify-center gap-4">
-                  <button onClick={() => { showToast('Proceeding to Next Step'); markStepComplete(5); setTimeout(() => setStep(6), 1000); }} className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">Simulate Final Approval</button>
+                  <button onClick={() => { showToast('Proceeding to Next Step'); markStepComplete(5); setTimeout(() => setStep(6), 1000); }} className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
+                    {userRole === 'vendor' ? "Complete Installation" : "Simulate Final Approval"}
+                  </button>
                 </div>
               </div>
               {renderVetosDetails(vetosData)}
