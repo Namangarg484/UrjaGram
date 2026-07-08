@@ -104,10 +104,13 @@ export default function UrjaSakhi({ showToast }) {
       const file = e.target.files[0];
       setUploadingDoc({ id: type, side });
       setTimeout(() => {
-        setDocuments(prev => ({ 
-          ...prev, 
-          [type]: { ...prev[type], [side]: file.name } 
-        }));
+        setDocuments(prev => ({
+        ...prev,
+        [type]: {
+          ...(prev[type] || {}),
+          [side]: file.name
+        }
+      }));
         setUploadingDoc({ id: null, side: null });
         showToast(`Document uploaded successfully`, 'success');
       }, 1200);
@@ -161,9 +164,9 @@ export default function UrjaSakhi({ showToast }) {
           bankName: formData.bankName || undefined,
           bankAccountNumber: formData.bankAccountNumber || undefined,
           bankIfsc: formData.bankIfsc || undefined,
-          bankProofUrl: documents.bankProof.front,
-          electricityBillFrontUrl: documents.bill.front,
-          electricityBillBackUrl: documents.bill.back,
+          bankProofUrl: documents.bankProof?.front,
+          electricityBillFrontUrl: documents.bill?.front,
+          electricityBillBackUrl: documents.bill?.back,
           rooftopPhotoFrontUrl: documents.photos.length > 0 ? documents.photos[0] : null,
           rooftopPhotoBackUrl: documents.photos.length > 1 ? documents.photos[1] : null,
           rooftopPhotosList: documents.photos,
@@ -200,9 +203,9 @@ export default function UrjaSakhi({ showToast }) {
           bank_name: formData.bankName,
           bank_account_number: formData.bankAccountNumber,
           bank_ifsc: formData.bankIfsc,
-          bank_proof_url: documents.bankProof.front,
-          electricity_bill_front_url: documents.bill.front,
-          electricity_bill_back_url: documents.bill.back,
+          bank_proof_url: documents.bankProof?.front,
+          electricity_bill_front_url: documents.bill?.front,
+          electricity_bill_back_url: documents.bill?.back,
           rooftop_photo_front_url: documents.photos.length > 0 ? documents.photos[0] : null,
           rooftop_photo_back_url: documents.photos.length > 1 ? documents.photos[1] : null,
           status: 'pushed'
@@ -407,7 +410,7 @@ export default function UrjaSakhi({ showToast }) {
                   {doc.sides.map((side) => (
                     <div key={side} className="flex flex-col gap-2 rounded-lg border border-slate-100 bg-white/80 p-2 items-center justify-center">
                       <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">{doc.sides.length === 2 ? side : 'Upload'}</span>
-                      {documents[doc.id][side] ? (
+                      {documents[doc.id]?.[side] ? (
                         <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700 border border-emerald-200">
                           <FileCheck2 className="h-3 w-3" />
                           Uploaded
